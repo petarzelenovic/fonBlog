@@ -5,9 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 mongoose
-    .connect(
-        "mongodb+srv://petar:petar@fon-blog.xbn8otm.mongodb.net/fon-blog?retryWrites=true&w=majority&appName=fon-blog"
-    )
+    .connect(process.env.MONGO)
     .then(() => {
         console.log("MongoDB is connected");
     })
