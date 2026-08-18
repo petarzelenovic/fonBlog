@@ -40,9 +40,9 @@ export default function SignIn() {
       });
       const data = await res.json();
       // TODO: add success in response object
-      if (!data.success) {
-        return dispatch(signInFailure(data.message));
-      }
+      // if (!data.success) {
+      //   return dispatch(signInFailure(data.message));
+      // }
       if (res.ok) {
         dispatch(signInSuccess(data));
         navigate("/");
@@ -95,7 +95,7 @@ export default function SignIn() {
                   <span className="pl-3">Loading...</span>
                 </>
               ) : (
-                "Sign up"
+                "Sign In"
               )}
             </Button>
             {errorMessage && (
