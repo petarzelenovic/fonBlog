@@ -2,10 +2,21 @@
 @import "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   html,
-  body {
-    @apply min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-200;
+  body,
+  #root {
+    @apply min-h-screen bg-white text-gray-700 dark:bg-[rgb(16,23,42)] dark:text-gray-200;
   }
 }
 
