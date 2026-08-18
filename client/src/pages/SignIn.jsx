@@ -1,11 +1,19 @@
 import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { loading, error: errorMessage } = useSelector((state) => state.user);
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -18,12 +26,11 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      return setErrorMessage("Please fill in all fields");
+      return dispatch(signInFailure("Please fill in all fields"));
     }
 
     try {
-      setLoading(true);
-      setErrorMessage(null);
+      dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
@@ -32,13 +39,18 @@ export default function SignIn() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
+      // TODO: add success in response object
+      if (!data.success) {
+        return dispatch(signInFailure(data.message));
+      }
       if (res.ok) {
+        dispatch(signInSuccess(data));
         navigate("/");
+      } else {
+        dispatch(signInFailure(data.message));
       }
     } catch (error) {
-      setErrorMessage(data.message);
-    } finally {
-      setLoading(false);
+      dispatch(signInFailure(error.message));
     }
   };
 
@@ -87,11 +99,7 @@ export default function SignIn() {
               )}
             </Button>
             {errorMessage && (
-              <Alert
-                className="mt-5"
-                color="failure"
-                onDismiss={() => setErrorMessage(null)}
-              >
+              <Alert className="mt-5" color="failure">
                 {errorMessage}
               </Alert>
             )}
