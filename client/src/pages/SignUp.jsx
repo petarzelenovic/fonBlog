@@ -83,7 +83,7 @@ export default function SignUp() {
               <Label htmlFor="password">Your password</Label>
               <TextInput
                 type="password"
-                placeholder="Your password"
+                placeholder="***************"
                 id="password"
                 className="mt-2"
                 onChange={handleChange}
@@ -113,7 +113,7 @@ export default function SignUp() {
             <span className="text-sm text-gray-500">
               Already have an account?{" "}
               <Link to="/sign-in" className="text-blue-500">
-                Sign in
+                Sign In
               </Link>
             </span>
           </div>
