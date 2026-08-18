@@ -1,3 +1,10 @@
 @import "tailwindcss";
 @import "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
+
+@layer base {
+  html,
+  body {
+    @apply min-h-screen bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-200;
+  }
+}
