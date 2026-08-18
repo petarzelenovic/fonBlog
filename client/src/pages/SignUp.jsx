@@ -30,7 +30,7 @@ export default function SignUp() {
               <Label htmlFor="username">Your email</Label>
               <TextInput
                 type="email"
-                placeholder="pz20233040@fon.bg.ac.rs"
+                placeholder="pz20233040@student.fon.bg.ac.rs"
                 id="email"
                 className="mt-2"
               />
