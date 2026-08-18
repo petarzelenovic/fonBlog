@@ -8,6 +8,7 @@ import {
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import OAuth from "../components/OAuth";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
@@ -98,6 +99,7 @@ export default function SignIn() {
                 "Sign In"
               )}
             </Button>
+            <OAuth />
             {errorMessage && (
               <Alert className="mt-5" color="failure">
                 {errorMessage}
