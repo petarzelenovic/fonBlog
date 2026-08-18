@@ -39,7 +39,7 @@ export default function Header() {
         <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
           <FaMoon />
         </Button>
-        <Link to="/signin">
+        <Link to="/sign-in">
           <Button className="bg-linear-to-r from-purple-500 to-blue-500 text-white">
             Sign In
           </Button>
