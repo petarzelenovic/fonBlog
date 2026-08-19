@@ -34,3 +34,11 @@
 .toast-in {
   animation: toast-in 0.35s ease-out;
 }
+
+body {
+  height: 100vh;
+}
+
+.ql-editor {
+  font-size: 1.05rem;
+}
