@@ -3,9 +3,6 @@ import {
   Button,
   Dropdown,
   Navbar,
-  NavbarCollapse,
-  NavbarLink,
-  NavbarToggle,
   TextInput,
   DropdownHeader,
   DropdownItem,
@@ -20,7 +17,6 @@ import { signOutSuccess } from "../redux/user/userSlice";
 import { useState, useEffect } from "react";
 
 export default function Header() {
-  const path = useLocation().pathname;
   const location = useLocation();
 
   const { currentUser } = useSelector((state) => state.user);
@@ -97,6 +93,13 @@ export default function Header() {
         >
           {theme === "dark" ? <FaSun /> : <FaMoon />}
         </Button>
+        {currentUser?.isAdmin && (
+          <Link to="/create-post">
+            <Button className="bg-linear-to-r from-purple-500 to-blue-500 text-white">
+              Create post
+            </Button>
+          </Link>
+        )}
         {currentUser ? (
           <Dropdown
             arrowIcon={false}
@@ -131,14 +134,7 @@ export default function Header() {
             </Button>
           </Link>
         )}
-
-        <NavbarToggle />
       </div>
-      <NavbarCollapse>
-        <NavbarLink as={Link} to="/" active={path === "/"}>
-          Home
-        </NavbarLink>
-      </NavbarCollapse>
     </Navbar>
   );
 }
