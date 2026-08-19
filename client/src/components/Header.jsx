@@ -14,9 +14,6 @@ import { signOutSuccess } from "../redux/user/userSlice";
 import { useState, useEffect } from "react";
 import logo from "../assets/logo.svg";
 
-const iconBtnClass =
-  "inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white";
-
 export default function Header() {
   const location = useLocation();
   const { currentUser } = useSelector((state) => state.user);
@@ -85,7 +82,7 @@ export default function Header() {
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <button
             type="button"
-            className={iconBtnClass}
+            className="flex size-9 cursor-pointer items-center justify-center rounded-lg hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-amber-500/15 dark:hover:text-amber-400"
             onClick={() => dispatch(toggleTheme())}
             aria-label={theme === "dark" ? "Svetli režim" : "Tamni režim"}
           >
@@ -115,15 +112,15 @@ export default function Header() {
                 />
               }
             >
-                <DropdownHeader>
-                  <span className="block text-sm">@{currentUser.username}</span>
-                  <span className="block truncate text-sm font-medium">
-                    {currentUser.email}
-                  </span>
-                </DropdownHeader>
-                <DropdownItem>
-                  <Link to="/dashboard?tab=profile">Profil</Link>
-                </DropdownItem>
+              <DropdownHeader>
+                <span className="block text-sm">@{currentUser.username}</span>
+                <span className="block truncate text-sm font-medium">
+                  {currentUser.email}
+                </span>
+              </DropdownHeader>
+              <DropdownItem>
+                <Link to="/dashboard?tab=profile">Profil</Link>
+              </DropdownItem>
               <DropdownDivider />
               <DropdownItem onClick={handleSignOut} className="cursor-pointer">
                 Odjavi se
