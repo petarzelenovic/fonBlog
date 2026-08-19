@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="280" viewBox="0 0 1000 280" role="img" aria-labelledby="title desc">
+  <title id="title">FonBlog logo za header</title>
+  <desc id="desc">Otvorena knjiga sa stranicama u FON bojama i natpis FonBlog, na transparentnoj pozadini.</desc>
+  <g transform="translate(28 30) scale(.88)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 55 C60 33 111 44 142 76 V216 C104 185 58 178 10 196Z" stroke="#004A7C" stroke-width="14"/>
+    <path d="M142 76 C173 44 224 33 274 55 V196 C226 178 180 185 142 216Z" stroke="#D058A0" stroke-width="14"/>
+    <path d="M35 89 C72 74 105 80 124 98" stroke="#FFCD67" stroke-width="11"/>
+    <path d="M35 128 C72 113 105 119 124 137" stroke="#60C3AD" stroke-width="11"/>
+    <path d="M160 98 C180 80 213 74 249 89" stroke="#9B95C9" stroke-width="11"/>
+    <path d="M160 137 C180 119 213 113 249 128" stroke="#F48580" stroke-width="11"/>
+  </g>
+  <g font-family="Inter, Manrope, Arial, sans-serif" font-size="112" font-weight="760" letter-spacing="-4">
+    <text x="327" y="178" fill="#004A7C">Fon</text>
+    <text x="516" y="178" fill="#D058A0">Blog</text>
+  </g>
+</svg>

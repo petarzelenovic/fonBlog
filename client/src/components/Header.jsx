@@ -1,24 +1,24 @@
 import {
   Avatar,
-  Button,
   Dropdown,
-  Navbar,
-  TextInput,
   DropdownHeader,
   DropdownItem,
   DropdownDivider,
 } from "flowbite-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AiOutlineSearch, AiOutlineUser } from "react-icons/ai";
+import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon, FaSun } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
 import { signOutSuccess } from "../redux/user/userSlice";
 import { useState, useEffect } from "react";
+import logo from "../assets/logo.svg";
+
+const iconBtnClass =
+  "inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white";
 
 export default function Header() {
   const location = useLocation();
-
   const { currentUser } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const { theme } = useSelector((state) => state.theme);
@@ -61,80 +61,84 @@ export default function Header() {
   };
 
   return (
-    <Navbar className="relative z-20 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-[rgb(16,23,42)]">
-      <Link
-        to="/"
-        className="self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white"
-      >
-        <span className="px-2 py-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
-          Fon
-        </span>
-        Blog
-      </Link>
-      <form onSubmit={handleSearch}>
-        <TextInput
-          type="search"
-          placeholder="Search.."
-          rightIcon={AiOutlineSearch}
-          className="hidden lg:inline"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </form>
-      <Button className="w-12 h-10 lg:hidden" color="gray" pill>
-        <AiOutlineSearch />
-      </Button>
-      <div className="flex gap-2 md:order-2">
-        <Button
-          className="w-12 h-10 p-0 hidden sm:inline-flex items-center justify-center"
-          color="gray"
-          pill
-          onClick={() => dispatch(toggleTheme())}
+    <header className="sticky top-0 z-30 bg-gray-50 dark:bg-gray-800">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="inline-flex shrink-0 items-center">
+          <img src={logo} alt="Fon Blog" className="h-10 w-auto" />
+        </Link>
+
+        <form
+          onSubmit={handleSearch}
+          className="relative min-w-0 flex-1 md:max-w-xs lg:max-w-sm"
         >
-          {theme === "dark" ? <FaSun /> : <FaMoon />}
-        </Button>
-        {currentUser?.isAdmin && (
-          <Link to="/create-post">
-            <Button className="bg-linear-to-r from-purple-500 to-blue-500 text-white">
-              Create post
-            </Button>
-          </Link>
-        )}
-        {currentUser ? (
-          <Dropdown
-            arrowIcon={false}
-            inline
-            label={
-              <Avatar
-                src={currentUser.profilePicture}
-                size="sm"
-                alt="User avatar"
-                rounded
-              />
-            }
+          <AiOutlineSearch className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <input
+            type="search"
+            placeholder="Pretraga..."
+            className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            aria-label="Pretraga"
+          />
+        </form>
+
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <button
+            type="button"
+            className={iconBtnClass}
+            onClick={() => dispatch(toggleTheme())}
+            aria-label={theme === "dark" ? "Svetli režim" : "Tamni režim"}
           >
-            <DropdownHeader>
-              <span className="block text-sm">@{currentUser.username}</span>
-              <span className="block text-sm font-medium truncate">
-                {currentUser.email}
-              </span>
-            </DropdownHeader>
-            <DropdownItem>
-              <Link to="/dashboard?tab=profile">Profile</Link>
-            </DropdownItem>
-            <DropdownDivider />
-            <DropdownItem onClick={handleSignOut} className="cursor-pointer">
-              Sign out
-            </DropdownItem>
-          </Dropdown>
-        ) : (
-          <Link to="/sign-in">
-            <Button className="bg-linear-to-r from-purple-500 to-blue-500 text-white">
-              Sign In
-            </Button>
-          </Link>
-        )}
+            {theme === "dark" ? <FaSun /> : <FaMoon />}
+          </button>
+
+          {currentUser?.isAdmin && (
+            <Link
+              to="/create-post"
+              className="hidden rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 sm:inline-flex"
+            >
+              Nova objava
+            </Link>
+          )}
+
+          {currentUser ? (
+            <Dropdown
+              arrowIcon={false}
+              inline
+              label={
+                <Avatar
+                  src={currentUser.profilePicture}
+                  size="sm"
+                  alt="User avatar"
+                  rounded
+                  className="cursor-pointer"
+                />
+              }
+            >
+                <DropdownHeader>
+                  <span className="block text-sm">@{currentUser.username}</span>
+                  <span className="block truncate text-sm font-medium">
+                    {currentUser.email}
+                  </span>
+                </DropdownHeader>
+                <DropdownItem>
+                  <Link to="/dashboard?tab=profile">Profil</Link>
+                </DropdownItem>
+              <DropdownDivider />
+              <DropdownItem onClick={handleSignOut} className="cursor-pointer">
+                Odjavi se
+              </DropdownItem>
+            </Dropdown>
+          ) : (
+            <Link
+              to="/sign-in"
+              className="rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Prijavi se
+            </Link>
+          )}
+        </div>
       </div>
-    </Navbar>
+    </header>
   );
 }
