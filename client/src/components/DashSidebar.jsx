@@ -67,6 +67,14 @@ export default function DashSidebar() {
             <>
               <SidebarItem
                 as={Link}
+                to="/dashboard?tab=dash"
+                active={tab === "dash"}
+                icon={HiDocumentText}
+              >
+                Dashboard
+              </SidebarItem>
+              <SidebarItem
+                as={Link}
                 to="/dashboard?tab=posts"
                 active={tab === "posts"}
                 icon={HiDocumentText}

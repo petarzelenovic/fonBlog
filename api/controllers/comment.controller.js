@@ -113,7 +113,7 @@ export const getComments = async (req, res, next) => {
 
     const comments = await Comment.find()
       .populate("userId", "username profilePicture")
-      .populate("postId", "title slug")
+      .populate("postId", "title slug image")
       .sort({ createdAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
