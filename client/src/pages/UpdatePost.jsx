@@ -1,4 +1,4 @@
-import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
+import { Alert, Button, FileInput, Select, TextInput, Textarea } from "flowbite-react";
 import React from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
@@ -140,6 +140,27 @@ export default function UpdatePost() {
             <option value="business">Business</option>
             <option value="other">Other</option>
           </Select>
+        </div>
+        <div>
+          <label
+            htmlFor="excerpt"
+            className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            Excerpt
+          </label>
+          <Textarea
+            id="excerpt"
+            placeholder="Short summary shown on the post page and in article previews..."
+            rows={3}
+            maxLength={200}
+            onChange={(e) =>
+              setFormData({ ...formData, excerpt: e.target.value })
+            }
+            value={formData.excerpt || ""}
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            {200 - (formData.excerpt?.length || 0)} characters remaining
+          </p>
         </div>
         <div className="flex  gap-4 items-center justify-between ">
           <FileInput

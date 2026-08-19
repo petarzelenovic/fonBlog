@@ -65,7 +65,7 @@ export default function Header() {
   };
 
   return (
-    <Navbar className="border-b-2">
+    <Navbar className="relative z-20 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-[rgb(16,23,42)]">
       <Link
         to="/"
         className="self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white"

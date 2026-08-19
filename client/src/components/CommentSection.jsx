@@ -1,5 +1,12 @@
-import { Alert, Button, Modal, ModalBody, ModalHeader, Textarea } from "flowbite-react";
-import React, { useState, useEffect } from "react";
+import {
+  Alert,
+  Button,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  Textarea,
+} from "flowbite-react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
@@ -123,49 +130,39 @@ export default function CommentSection({ postId }) {
   }, [postId]);
 
   return (
-    <div className="max-w-2xl mx-auto w-full p-3">
+    <section className="mt-12 border-t border-gray-200 pt-10 antialiased dark:border-gray-700">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-lg font-bold text-gray-900 lg:text-2xl dark:text-white">
+          Discussion ({comments.length})
+        </h2>
+      </div>
+
       {currentUser ? (
-        <div className="flex items-center gap-1 my-5 text-gray-500 text-sm">
-          <p>Signed in as: </p>
-          <img
-            src={currentUser.profilePicture}
-            alt={currentUser.username}
-            className="h-5 w-5 rounded-full object-cover"
-          />
-          <Link
-            to="/dashboard?tab=profile"
-            className="text-blue-500 hover:underline"
-          >
-            @{currentUser.username}
-          </Link>
-        </div>
-      ) : (
-        <div className="text-sm text-teal-500 my-5 flex gap-1">
-          You must be logged in to comment
-          <Link to="/sign-in" className="text-blue-500 hover:underline">
-            Sign In
-          </Link>
-        </div>
-      )}
-      {currentUser && (
-        <form onSubmit={handleSubmit}>
-          <Textarea
-            placeholder="Add a comment.."
-            rows="3"
-            maxLength="200"
-            onChange={(e) => setComment(e.target.value)}
-            value={comment}
-          />
-          <div className="flex justify-between items-center mt-5">
-            <p className="text-sm text-gray-500">
+        <form className="mb-8" onSubmit={handleSubmit}>
+          <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-800">
+            <label htmlFor="comment" className="sr-only">
+              Your comment
+            </label>
+            <Textarea
+              id="comment"
+              placeholder="Write a comment..."
+              rows={6}
+              maxLength="200"
+              onChange={(e) => setComment(e.target.value)}
+              value={comment}
+              className="border-0 bg-transparent px-0 text-sm shadow-none focus:ring-0 dark:bg-transparent"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {200 - comment.length} characters remaining
             </p>
             <Button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md"
-              disabled={comment.length === 0}
+              className="bg-blue-700 text-white hover:bg-blue-800"
+              disabled={comment.trim().length === 0}
             >
-              Submit
+              Post comment
             </Button>
           </div>
           {commentError && (
@@ -174,21 +171,25 @@ export default function CommentSection({ postId }) {
             </Alert>
           )}
         </form>
-      )}
-      {comments.length === 0 ? (
-        <p className="text-sm my-5 text-gray-500">No comments yet!</p>
       ) : (
-        <>
-          <div className="text-sm my-5 flex items-center gap-1">
-            <p>Comments</p>
-            <div className="border border-gray-400 py-1 px-2 rounded-sm">
-              <p>{comments.length}</p>
-            </div>
-          </div>
-          {comments.map((comment) => (
+        <div className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+          You must be logged in to comment.{" "}
+          <Link to="/sign-in" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
+            Sign in
+          </Link>
+        </div>
+      )}
+
+      {comments.length === 0 ? (
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          No comments yet. Be the first to start the discussion.
+        </p>
+      ) : (
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {comments.map((commentItem) => (
             <Comment
-              key={comment._id}
-              comment={comment}
+              key={commentItem._id}
+              comment={commentItem}
               onLike={handleLike}
               onEdit={handleEdit}
               onDelete={(commentId) => {
@@ -197,8 +198,9 @@ export default function CommentSection({ postId }) {
               }}
             />
           ))}
-        </>
+        </div>
       )}
+
       <Modal
         show={showModal}
         onClose={() => setShowModal(false)}
@@ -228,6 +230,6 @@ export default function CommentSection({ postId }) {
           </div>
         </ModalBody>
       </Modal>
-    </div>
+    </section>
   );
 }
