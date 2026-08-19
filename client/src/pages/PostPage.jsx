@@ -1,6 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Spinner } from "flowbite-react";
+import { Spinner, Tooltip } from "flowbite-react";
 import { FaLink } from "react-icons/fa";
 import CommentSection from "../components/CommentSection";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
@@ -221,15 +221,16 @@ export default function PostPage() {
                     </time>
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={copyLink}
-                  className={copyBtnClass}
-                  aria-label={copied ? "Kopirano" : "Kopiraj link"}
-                  title={copied ? "Kopirano" : "Kopiraj link"}
-                >
-                  <FaLink className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip content={copied ? "Kopirano" : "Kopiraj link"}>
+                  <button
+                    type="button"
+                    onClick={copyLink}
+                    className={copyBtnClass}
+                    aria-label={copied ? "Kopirano" : "Kopiraj link"}
+                  >
+                    <FaLink className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
               </div>
 
               <div
