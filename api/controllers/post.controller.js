@@ -19,7 +19,7 @@ export const create = async (req, res, next) => {
 
   try {
     const savedPost = await newPost.save();
-    res.status(201).json({ message: "Post created successfully", savedPost });
+    res.status(201).json(savedPost);
   } catch (error) {
     return next(errorHandler(500, error.message));
   }
@@ -83,14 +83,27 @@ export const deletePost = async (req, res, next) => {
   }
 };
 
-export const getPost = async (req, res) => {
-  const post = await Post.findById(req.params.id);
-  res.status(200).json(post);
-};
-
-export const updatePost = async (req, res) => {
-  const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.status(200).json({ message: "Post updated successfully", post });
+export const updatePost = async (req, res, next) => {
+  if (!req.user.isAdmin || req.user.id !== req.params.userId) {
+    return next(
+      errorHandler(403, "You are not authorized to update this post"),
+    );
+  }
+  try {
+    const updatedPost = await Post.findByIdAndUpdate(
+      req.params.postId,
+      {
+        $set: {
+          title: req.body.title,
+          content: req.body.content,
+          category: req.body.category,
+          image: req.body.image,
+        },
+      },
+      { new: true },
+    );
+    res.status(200).json(updatedPost);
+  } catch (error) {
+    return next(error);
+  }
 };
