@@ -107,7 +107,7 @@ export default function Header() {
               inline
               label={
                 <Avatar
-                  src={currentUser.profilePicture}
+                  img={currentUser.profilePicture}
                   size="sm"
                   alt="User avatar"
                   rounded
