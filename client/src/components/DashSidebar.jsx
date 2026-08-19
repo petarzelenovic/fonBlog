@@ -10,6 +10,7 @@ import {
   HiArrowSmRight,
   HiDocumentText,
   HiUserGroup,
+  HiAnnotation,
 } from "react-icons/hi";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -79,6 +80,14 @@ export default function DashSidebar() {
                 icon={HiUserGroup}
               >
                 Users
+              </SidebarItem>
+              <SidebarItem
+                as={Link}
+                to="/dashboard?tab=comments"
+                active={tab === "comments"}
+                icon={HiAnnotation}
+              >
+                Comments
               </SidebarItem>
             </>
           )}
