@@ -1,12 +1,16 @@
 import React from "react";
 import { FaThumbsUp } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 const defaultAvatar =
   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
 
-export default function Comment({ comment }) {
+export default function Comment({ comment, onLike }) {
+  const { currentUser } = useSelector((state) => state.user);
   const username = comment.user?.username || "deleted user";
   const profilePicture = comment.user?.profilePicture || defaultAvatar;
+  const likedByCurrentUser =
+    currentUser && comment.likes?.includes(currentUser._id);
 
   return (
     <div className="flex p-4 border-b dark:border-gray-600 text-sm">
@@ -26,7 +30,11 @@ export default function Comment({ comment }) {
         </div>
         <p className="text-gray-500 pb-2">{comment.content}</p>
         <div className="flex items-center gap-1 text-xs text-gray-500">
-          <FaThumbsUp className="text-sm" />
+          <button type="button" onClick={() => onLike(comment._id)}>
+            <FaThumbsUp
+              className={`text-sm ${likedByCurrentUser && "text-blue-500"}`}
+            />
+          </button>
           <p>
             {comment.numberOfLikes}{" "}
             {comment.numberOfLikes === 1 ? "like" : "likes"}
