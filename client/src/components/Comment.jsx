@@ -8,7 +8,7 @@ const defaultAvatar =
   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
 
 function formatCommentDate(dateString) {
-  return new Date(dateString).toLocaleDateString("en-US", {
+  return new Date(dateString).toLocaleDateString("sr-Latn", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -19,7 +19,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
   const { currentUser } = useSelector((state) => state.user);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
-  const username = comment.userId?.username || "deleted user";
+  const username = comment.userId?.username || "obrisan korisnik";
   const profilePicture = comment.userId?.profilePicture || defaultAvatar;
   const likedByCurrentUser =
     currentUser && comment.likes?.includes(currentUser._id);
@@ -69,7 +69,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
             inline
             label={
               <span className="inline-flex rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700">
-                <span className="sr-only">Comment settings</span>
+                <span className="sr-only">Podešavanja komentara</span>
                 <HiDotsHorizontal className="h-5 w-5" />
               </span>
             }
@@ -80,10 +80,10 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                 setEditedContent(comment.content);
               }}
             >
-              Edit
+              Izmeni
             </DropdownItem>
             <DropdownItem onClick={() => onDelete(comment._id)}>
-              Delete
+              Obriši
             </DropdownItem>
           </Dropdown>
         )}
@@ -105,7 +105,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
               onClick={handleSave}
               disabled={editedContent.trim().length === 0}
             >
-              Save
+              Sačuvaj
             </Button>
             <Button
               type="button"
@@ -116,7 +116,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                 setEditedContent(comment.content);
               }}
             >
-              Cancel
+              Otkaži
             </Button>
           </div>
         </>
@@ -135,8 +135,8 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
             >
               <FaThumbsUp className="mr-1.5 h-3.5 w-3.5" />
               {comment.numberOfLikes > 0
-                ? `${comment.numberOfLikes} ${comment.numberOfLikes === 1 ? "Like" : "Likes"}`
-                : "Like"}
+                ? `${comment.numberOfLikes} ${comment.numberOfLikes === 1 ? "sviđanje" : "sviđanja"}`
+                : "Sviđa mi se"}
             </button>
           </div>
         </>

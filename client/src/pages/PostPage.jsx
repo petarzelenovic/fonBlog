@@ -20,21 +20,26 @@ function getReadingMinutes(html) {
   return Math.max(1, Math.round(stripHtml(html).length / 1000));
 }
 
+function formatReadingTime(minutes) {
+  const lastTwo = minutes % 100;
+  const last = minutes % 10;
+  if (last === 1 && lastTwo !== 11) {
+    return `Pročitaj za ${minutes} minut`;
+  }
+  return `Pročitaj za ${minutes} minuta`;
+}
+
 function formatMetaDate(dateString) {
   const date = new Date(dateString);
-  const datePart = date.toLocaleDateString("en-US", {
+  const datePart = date.toLocaleDateString("sr-Latn", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
-  const timePart = date
-    .toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    })
-    .toLowerCase()
-    .replace(" ", "");
+  const timePart = date.toLocaleTimeString("sr-Latn", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   return `${datePart} ${timePart}`;
 }
 
@@ -61,7 +66,7 @@ export default function PostPage() {
           return;
         }
         setPost(data.posts[0] || null);
-        setError(data.posts[0] ? null : "Post not found");
+        setError(data.posts[0] ? null : "Objava nije pronađena");
       } catch (err) {
         setError(err.message);
       } finally {
@@ -135,13 +140,13 @@ export default function PostPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-4 text-center">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Post not found
+          Objava nije pronađena
         </h1>
         <p className="text-gray-500 dark:text-gray-400">
-          {error || "This article does not exist or was removed."}
+          {error || "Ovaj članak ne postoji ili je uklonjen."}
         </p>
         <Link to="/search" className="text-blue-600 hover:underline">
-          Browse posts
+          Pregledaj objave
         </Link>
       </div>
     );
@@ -202,11 +207,11 @@ export default function PostPage() {
                 <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                   <img
                     src={author?.profilePicture || defaultAvatar}
-                    alt={author?.username || "Author"}
+                    alt={author?.username || "Autor"}
                     className="h-8 w-8 rounded-full object-cover"
                   />
                   <p>
-                    By{" "}
+                    Napisao je{" "}
                     <span className="font-semibold text-gray-900 dark:text-white">
                       {author?.username || "Fon Blog"}
                     </span>
@@ -220,8 +225,8 @@ export default function PostPage() {
                   type="button"
                   onClick={copyLink}
                   className={copyBtnClass}
-                  aria-label={copied ? "Copied" : "Copy link"}
-                  title={copied ? "Copied" : "Copy link"}
+                  aria-label={copied ? "Kopirano" : "Kopiraj link"}
+                  title={copied ? "Kopirano" : "Kopiraj link"}
                 >
                   <FaLink className="h-3.5 w-3.5" />
                 </button>
@@ -235,13 +240,13 @@ export default function PostPage() {
               <CommentSection postId={post._id} />
             </article>
 
-            <aside className="lg:col-span-4" aria-label="Latest news">
+            <aside className="lg:col-span-4" aria-label="Najnovije vesti">
               <h2 className="mb-6 text-sm font-bold uppercase tracking-wide text-gray-900 dark:text-white">
-                Latest news
+                Najnovije vesti
               </h2>
               {latestPosts.length === 0 ? (
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  No other articles yet.
+                  Još nema drugih članaka.
                 </p>
               ) : (
                 <div className="space-y-8">
@@ -268,7 +273,7 @@ export default function PostPage() {
                             </p>
                           )}
                           <span className="text-sm font-medium text-blue-600 dark:text-blue-500">
-                            Read in {minutes} minute{minutes === 1 ? "" : "s"}
+                            {formatReadingTime(minutes)}
                           </span>
                         </div>
                       </Link>
@@ -282,10 +287,10 @@ export default function PostPage() {
           {relatedPosts.length > 0 && (
             <section
               className="mt-12 border-t border-gray-200 pt-10 dark:border-gray-700"
-              aria-label="Read next"
+              aria-label="Sledeće za čitanje"
             >
               <h2 className="mb-8 text-2xl font-bold text-gray-900 dark:text-white">
-                Read Next
+                Pročitaj sledeće
               </h2>
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {relatedPosts.map((relatedPost) => (
@@ -300,7 +305,7 @@ export default function PostPage() {
                         {relatedPost.title}
                       </h3>
                       <span className="text-sm font-medium text-blue-600 group-hover:underline dark:text-blue-500">
-                        Read more
+                        Pročitaj više
                       </span>
                     </Link>
                   </article>

@@ -133,7 +133,7 @@ export default function CommentSection({ postId }) {
     <section className="mt-12 border-t border-gray-200 pt-10 antialiased dark:border-gray-700">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-lg font-bold text-gray-900 lg:text-2xl dark:text-white">
-          Discussion ({comments.length})
+          Komentari ({comments.length})
         </h2>
       </div>
 
@@ -141,11 +141,11 @@ export default function CommentSection({ postId }) {
         <form className="mb-8" onSubmit={handleSubmit}>
           <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-800">
             <label htmlFor="comment" className="sr-only">
-              Your comment
+              Vaš komentar
             </label>
             <Textarea
               id="comment"
-              placeholder="Write a comment..."
+              placeholder="Napišite komentar..."
               rows={6}
               maxLength="200"
               onChange={(e) => setComment(e.target.value)}
@@ -155,14 +155,14 @@ export default function CommentSection({ postId }) {
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              {200 - comment.length} characters remaining
+              {200 - comment.length} karaktera preostalo
             </p>
             <Button
               type="submit"
               className="bg-blue-700 text-white hover:bg-blue-800"
               disabled={comment.trim().length === 0}
             >
-              Post comment
+              Objavi komentar
             </Button>
           </div>
           {commentError && (
@@ -173,16 +173,16 @@ export default function CommentSection({ postId }) {
         </form>
       ) : (
         <div className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
-          You must be logged in to comment.{" "}
+          Morate biti prijavljeni da biste ostavili komentar.{" "}
           <Link to="/sign-in" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
-            Sign in
+            Prijavite se
           </Link>
         </div>
       )}
 
       {comments.length === 0 ? (
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          No comments yet. Be the first to start the discussion.
+          Još nema komentara. Budite prvi koji će ostaviti komentar.
         </p>
       ) : (
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -213,18 +213,18 @@ export default function CommentSection({ postId }) {
           <div className="text-center">
             <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
             <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete this comment? This cannot be
-              undone.
+              Da li ste sigurni da želite da obrišete ovaj komentar? Ova radnja
+              se ne može opozvati.
             </h3>
             <div className="flex justify-center gap-4">
               <Button
                 color="failure"
                 onClick={() => handleDelete(commentToDelete)}
               >
-                Yes, I&apos;m sure
+                Da, obriši
               </Button>
               <Button color="gray" onClick={() => setShowModal(false)}>
-                No, cancel
+                Ne, otkaži
               </Button>
             </div>
           </div>
