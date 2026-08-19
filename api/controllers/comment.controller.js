@@ -20,3 +20,21 @@ export const createComment = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getPostComments = async (req, res, next) => {
+  try {
+    const comments = await Comment.find({ postId: req.params.postId })
+      .populate("userId", "username profilePicture")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const commentsWithUser = comments.map(({ userId, ...rest }) => ({
+      ...rest,
+      user: userId,
+    }));
+
+    res.status(200).json(commentsWithUser);
+  } catch (error) {
+    next(error);
+  }
+};
