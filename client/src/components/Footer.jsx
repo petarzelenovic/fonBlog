@@ -1,43 +1,71 @@
-import React from "react";
-import {
-  Footer,
-  FooterLink,
-  FooterLinkGroup,
-  FooterTitle,
-} from "flowbite-react";
 import { Link } from "react-router-dom";
+import { useCategories } from "../contexts/CategoriesContext.jsx";
+
+const linkClass =
+  "text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500";
 
 export default function FooterComponent() {
+  const { categories } = useCategories();
+
   return (
-    <Footer container className="border border-t-8 border-teal-500">
-      <div className="w-full max-w-7xl mx-auto">
-        <div className="grid w-full justify-between sm:flex md:grid-cols-1">
-          <div>
+    <footer className="bg-gray-50 dark:bg-gray-800">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid items-center gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-5">
             <Link
               to="/"
-              className="self-center whitespace-nowrap text-lg sm:text-xl font-semibold dark:text-white"
+              className="inline-block whitespace-nowrap text-lg font-semibold sm:text-xl dark:text-white"
             >
-              <span className="px-2 py-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
+              <span className="rounded-lg bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 px-2 py-1 text-white">
                 Fon
               </span>
               Blog
             </Link>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm: mt-5 sm:grid-cols-3 sm:gap-6">
-            <div>
-              {" "}
-              <FooterLinkGroup col>
-                <FooterLink href="/" target="_blank" rel="noopener noreferrer">
-                  Some link
-                </FooterLink>
-                <FooterLink href="/" target="_blank" rel="noopener noreferrer">
-                  Fon blog
-                </FooterLink>
-              </FooterLinkGroup>
-            </div>
+
+          <div className="lg:col-span-4">
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-gray-900 dark:text-white">
+              Kategorije
+            </h2>
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
+              {categories.map((category) => (
+                <li key={category._id}>
+                  <Link
+                    to={`/search?category=${category.slug}`}
+                    className={linkClass}
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="lg:col-span-3">
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wide text-gray-900 dark:text-white">
+              Navigacija
+            </h2>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/" className={linkClass}>
+                  Početna
+                </Link>
+              </li>
+              <li>
+                <Link to="/search" className={linkClass}>
+                  Pretraga
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
+
+        <div className="mt-10 border-t border-gray-200 pt-6 dark:border-gray-700">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            © {new Date().getFullYear()} Fon Blog
+          </p>
+        </div>
       </div>
-    </Footer>
+    </footer>
   );
 }
