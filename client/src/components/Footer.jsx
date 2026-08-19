@@ -26,7 +26,6 @@ export default function FooterComponent() {
           <div className="grid grid-cols-2 gap-3 sm: mt-5 sm:grid-cols-3 sm:gap-6">
             <div>
               {" "}
-              <FooterTitle title="About" />
               <FooterLinkGroup col>
                 <FooterLink href="/" target="_blank" rel="noopener noreferrer">
                   Some link
