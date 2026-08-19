@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Spinner } from "flowbite-react";
 import { FaLink } from "react-icons/fa";
 import CommentSection from "../components/CommentSection";
+import { useCategories } from "../contexts/CategoriesContext.jsx";
 
 const defaultAvatar =
   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
@@ -38,6 +39,7 @@ function formatMetaDate(dateString) {
 }
 
 export default function PostPage() {
+  const { getCategoryColor, getCategoryName } = useCategories();
   const { postSlug } = useParams();
   const [post, setPost] = useState(null);
   const [author, setAuthor] = useState(null);
@@ -175,16 +177,17 @@ export default function PostPage() {
           <div className="w-full lg:w-8/12 lg:pr-12">
             <Link
               to={`/search?category=${post.category}`}
-              className="mb-4 inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-xs font-medium capitalize text-white backdrop-blur-sm hover:bg-white/30"
+              className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white backdrop-blur-sm hover:opacity-90"
+              style={{ backgroundColor: getCategoryColor(post.category) }}
             >
-              {post.category}
+              {getCategoryName(post.category)}
             </Link>
             <h1 className="mb-3 text-3xl font-extrabold leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
               {post.title}
             </h1>
-            {post.excerpt?.trim() && (
+            {post.shortDescription?.trim() && (
               <p className="max-w-2xl text-base font-light text-gray-200 md:text-lg">
-                {post.excerpt.trim()}
+                {post.shortDescription.trim()}
               </p>
             )}
           </div>
@@ -259,9 +262,9 @@ export default function PostPage() {
                           <h3 className="mb-1 text-base font-bold leading-snug text-gray-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-500">
                             {latestPost.title}
                           </h3>
-                          {latestPost.excerpt?.trim() && (
+                          {latestPost.shortDescription?.trim() && (
                             <p className="mb-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
-                              {latestPost.excerpt.trim()}
+                              {latestPost.shortDescription.trim()}
                             </p>
                           )}
                           <span className="text-sm font-medium text-blue-600 dark:text-blue-500">

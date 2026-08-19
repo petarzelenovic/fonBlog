@@ -1,23 +1,26 @@
 import { errorHandler } from "../utils/error.js";
-import Post from "../models/Post.model.js";
+import Post from "../models/post.model.js";
+import { validateCategorySlug } from "./category.controller.js";
 
 export const create = async (req, res, next) => {
   if (!req.user.isAdmin) {
     return next(errorHandler(403, "You are not authorized to create a post"));
   }
-  if (!req.body.title || !req.body.content) {
+  if (!req.body.title || !req.body.content || !req.body.category) {
     return next(errorHandler(400, "Please provide all required fields"));
   }
 
-  const slug = req.body.title.toLowerCase().replace(/[^a-zA-Z0-9]/g, "-");
-
-  const newPost = new Post({
-    ...req.body,
-    slug,
-    userId: req.user.id,
-  });
-
   try {
+    await validateCategorySlug(req.body.category);
+
+    const slug = req.body.title.toLowerCase().replace(/[^a-zA-Z0-9]/g, "-");
+
+    const newPost = new Post({
+      ...req.body,
+      slug,
+      userId: req.user.id,
+    });
+
     const savedPost = await newPost.save();
     res.status(201).json(savedPost);
   } catch (error) {
@@ -90,13 +93,15 @@ export const updatePost = async (req, res, next) => {
     );
   }
   try {
+    await validateCategorySlug(req.body.category);
+
     const updatedPost = await Post.findByIdAndUpdate(
       req.params.postId,
       {
         $set: {
           title: req.body.title,
           content: req.body.content,
-          excerpt: req.body.excerpt,
+          shortDescription: req.body.shortDescription,
           category: req.body.category,
           image: req.body.image,
         },
@@ -105,6 +110,9 @@ export const updatePost = async (req, res, next) => {
     );
     res.status(200).json(updatedPost);
   } catch (error) {
+    if (error.statusCode) {
+      return next(error);
+    }
     return next(error);
   }
 };

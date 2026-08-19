@@ -3,14 +3,16 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import PostCard from "../components/PostCard.jsx";
+import { useCategories } from "../contexts/CategoriesContext.jsx";
 
 export default function Search() {
+  const { categories } = useCategories();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarData, setSidebarData] = useState({
     searchTerm: "",
     sort: "desc",
-    category: "uncategorized",
+    category: "",
   });
 
   const [posts, setPosts] = useState([]);
@@ -25,7 +27,7 @@ export default function Search() {
     setSidebarData({
       searchTerm: searchTermFromUrl || "",
       sort: sortFromUrl || "desc",
-      category: categoryFromUrl || "uncategorized",
+      category: categoryFromUrl || "",
     });
 
     const fetchPosts = async () => {
@@ -56,8 +58,8 @@ export default function Search() {
       const order = e.target.value || "desc";
       setSidebarData({ ...sidebarData, sort: order });
     } else if (e.target.id === "category") {
-      const category = e.target.value || "uncategorized";
-      setSidebarData({ ...sidebarData, category: category });
+      const category = e.target.value;
+      setSidebarData({ ...sidebarData, category });
     }
   };
 
@@ -71,7 +73,11 @@ export default function Search() {
       urlParams.delete("searchTerm");
     }
     urlParams.set("sort", sidebarData.sort);
-    urlParams.set("category", sidebarData.category);
+    if (sidebarData.category) {
+      urlParams.set("category", sidebarData.category);
+    } else {
+      urlParams.delete("category");
+    }
     const searchQuery = urlParams.toString();
     navigate(`/search?${searchQuery}`);
   };
@@ -123,13 +129,12 @@ export default function Search() {
               value={sidebarData.category}
               onChange={handleChange}
             >
-              <option value="uncategorized">Uncategorized</option>
-              <option value="technology">Technology</option>
-              <option value="science">Science</option>
-              <option value="engineering">Engineering</option>
-              <option value="math">Math</option>
-              <option value="history">History</option>
-              <option value="art">Art</option>
+              <option value="">Sve kategorije</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category.slug}>
+                  {category.name}
+                </option>
+              ))}
             </Select>
           </div>
           <Button type="submit">Search</Button>

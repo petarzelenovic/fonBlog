@@ -20,7 +20,7 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    excerpt: {
+    shortDescription: {
       type: String,
       default: "",
       maxlength: 200,
@@ -34,7 +34,7 @@ const postSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      default: "uncategorized",
+      default: "studije",
     },
   },
   { timestamps: true },

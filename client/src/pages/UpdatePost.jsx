@@ -16,8 +16,10 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useCategories } from "../contexts/CategoriesContext.jsx";
 
 export default function UpdatePost() {
+  const { categories, defaultCategorySlug } = useCategories();
   const { postId } = useParams();
   const [file, setFile] = useState(null);
   const [imageUploadProgress, setImageUploadProgress] = useState(null);
@@ -130,36 +132,34 @@ export default function UpdatePost() {
             onChange={(e) =>
               setFormData({ ...formData, category: e.target.value })
             }
-            value={formData.category || "uncategorized"}
+            value={formData.category || defaultCategorySlug}
           >
-            <option value="uncategorized">Uncategorized</option>
-            <option value="web-development">Web Development</option>
-            <option value="mobile-development">Mobile Development</option>
-            <option value="design">Design</option>
-            <option value="marketing">Marketing</option>
-            <option value="business">Business</option>
-            <option value="other">Other</option>
+            {categories.map((category) => (
+              <option key={category._id} value={category.slug}>
+                {category.name}
+              </option>
+            ))}
           </Select>
         </div>
         <div>
           <label
-            htmlFor="excerpt"
+            htmlFor="shortDescription"
             className="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
           >
-            Excerpt
+            Short description
           </label>
           <Textarea
-            id="excerpt"
+            id="shortDescription"
             placeholder="Short summary shown on the post page and in article previews..."
             rows={3}
             maxLength={200}
             onChange={(e) =>
-              setFormData({ ...formData, excerpt: e.target.value })
+              setFormData({ ...formData, shortDescription: e.target.value })
             }
-            value={formData.excerpt || ""}
+            value={formData.shortDescription || ""}
           />
           <p className="mt-1 text-xs text-gray-500">
-            {200 - (formData.excerpt?.length || 0)} characters remaining
+            {200 - (formData.shortDescription?.length || 0)} characters remaining
           </p>
         </div>
         <div className="flex  gap-4 items-center justify-between ">
