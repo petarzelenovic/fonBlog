@@ -6,22 +6,26 @@ import {
   TextInput,
   Textarea,
 } from "flowbite-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
-import { app } from "../firebase";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { HiOutlinePhotograph } from "react-icons/hi";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
 import { SHORT_DESCRIPTION_LIMIT } from "../constants";
+import { uploadImage } from "../utils/uploadImage";
+
+const QUILL_TOOLBAR = [
+  [{ header: [1, 2, 3, false] }],
+  ["bold", "italic", "underline", "strike"],
+  ["blockquote", "code-block"],
+  [{ list: "ordered" }, { list: "bullet" }],
+  [{ indent: "-1" }, { indent: "+1" }],
+  ["link", "image"],
+  ["clean"],
+];
 
 function isEmptyHtml(html = "") {
   return (
@@ -44,9 +48,13 @@ export default function PostForm({
 }) {
   const { categories, defaultCategorySlug } = useCategories();
   const filePickerRef = useRef(null);
+  const editorFileInputRef = useRef(null);
+  const quillRef = useRef(null);
+  const editorSelectionRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [imageUploadProgress, setImageUploadProgress] = useState(null);
   const [imageUploadError, setImageUploadError] = useState(null);
+  const [contentUploadProgress, setContentUploadProgress] = useState(null);
   const [formError, setFormError] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -66,6 +74,7 @@ export default function PostForm({
   const selectedCategory = formData.category || defaultCategorySlug;
   const coverImage = formData.image || previewUrl;
   const uploading = imageUploadProgress !== null;
+  const contentUploading = contentUploadProgress !== null;
   const remainingChars =
     SHORT_DESCRIPTION_LIMIT - (formData.shortDescription?.length || 0);
 
@@ -73,39 +82,79 @@ export default function PostForm({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const insertImageAtCursor = (url) => {
+    const editor = quillRef.current?.getEditor?.();
+    if (!editor) {
+      return;
+    }
+
+    const range = editorSelectionRef.current ||
+      editor.getSelection(true) || {
+        index: Math.max(editor.getLength() - 1, 0),
+      };
+    editor.insertEmbed(range.index, "image", url, "user");
+    editor.setSelection(range.index + 1, 0);
+    editorSelectionRef.current = null;
+    return editor.root.innerHTML;
+  };
+
+  const uploadAndInsertEditorImage = async (file) => {
+    if (!file?.type.startsWith("image/") || contentUploadProgress !== null) {
+      return;
+    }
+
+    setFormError(null);
+    setContentUploadProgress(0);
+    try {
+      const url = await uploadImage(file, setContentUploadProgress);
+      const html = insertImageAtCursor(url);
+      setFormData((prev) => ({
+        ...prev,
+        content: html || `${prev.content || ""}<p><img src="${url}"></p>`,
+      }));
+    } catch (error) {
+      setFormError(error.message || "Otpremanje slike u sadržaj nije uspelo");
+    } finally {
+      setContentUploadProgress(null);
+    }
+  };
+
+  const quillModules = useMemo(
+    () => ({
+      toolbar: {
+        container: QUILL_TOOLBAR,
+        handlers: {
+          image: () => {
+            const editor = quillRef.current?.getEditor?.();
+            editorSelectionRef.current = editor?.getSelection(true);
+            editorFileInputRef.current?.click();
+          },
+        },
+      },
+    }),
+    [],
+  );
+
   const chipClass = (isActive) =>
     isActive
       ? "rounded-full border border-fon-navy px-3.5 py-1.5 text-sm font-medium text-fon-navy dark:border-white dark:text-white"
       : "rounded-full px-3.5 py-1.5 text-sm text-fon-muted hover:text-fon-navy dark:text-fon-dark-muted dark:hover:text-white";
 
-  const uploadImage = (selectedFile) => {
+  const uploadCoverImage = async (selectedFile) => {
     setImageUploadError(null);
     setImageUploadProgress(0);
-
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + selectedFile.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setImageUploadProgress(progress.toFixed(0));
-      },
-      (error) => {
-        setImageUploadError(error.message || "Otpremanje slike nije uspelo");
-        setImageUploadProgress(null);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setImageUploadProgress(null);
-          setImageUploadError(null);
-          setFormData((prev) => ({ ...prev, image: downloadURL }));
-        });
-      },
-    );
+    try {
+      const downloadURL = await uploadImage(
+        selectedFile,
+        setImageUploadProgress,
+      );
+      setImageUploadError(null);
+      setFormData((prev) => ({ ...prev, image: downloadURL }));
+    } catch (error) {
+      setImageUploadError(error.message || "Otpremanje slike nije uspelo");
+    } finally {
+      setImageUploadProgress(null);
+    }
   };
 
   const handleImageChange = (e) => {
@@ -114,8 +163,15 @@ export default function PostForm({
 
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(URL.createObjectURL(selectedFile));
-    uploadImage(selectedFile);
+    uploadCoverImage(selectedFile);
     e.target.value = "";
+  };
+
+  const handleEditorImageChange = (e) => {
+    const selectedFile = e.target.files?.[0];
+    e.target.value = "";
+    if (!selectedFile) return;
+    uploadAndInsertEditorImage(selectedFile);
   };
 
   const handleSubmit = (e) => {
@@ -284,15 +340,29 @@ export default function PostForm({
 
           <div>
             <Label htmlFor="content">Sadržaj *</Label>
+            <input
+              ref={editorFileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleEditorImageChange}
+            />
             <div className="post-editor mt-2">
               <ReactQuill
+                ref={quillRef}
                 id="content"
                 theme="snow"
                 placeholder="Napiši objavu..."
+                modules={quillModules}
                 value={formData.content || ""}
                 onChange={(value) => updateField("content", value)}
               />
             </div>
+            {contentUploading && (
+              <p className="mt-2 text-xs text-fon-muted dark:text-fon-dark-muted">
+                Otpremanje slike u sadržaj... {contentUploadProgress}%
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col-reverse gap-3 border-t border-fon-border pt-6 sm:flex-row sm:items-center sm:justify-between dark:border-fon-dark-border">
@@ -305,7 +375,7 @@ export default function PostForm({
             <Button
               type="submit"
               className="cursor-pointer bg-fon-navy text-white hover:bg-fon-navy-hover sm:min-w-44"
-              disabled={submitting || uploading}
+              disabled={submitting || uploading || contentUploading}
             >
               {submitting ? (
                 <>

@@ -1,13 +1,6 @@
 import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
-import { app } from "../firebase";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import {
@@ -22,6 +15,7 @@ import {
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { USERNAME_PATTERN } from "../constants";
+import { uploadImage } from "../utils/uploadImage";
 import ConfirmModal from "./ConfirmModal";
 
 export default function DashProfile() {
@@ -49,7 +43,7 @@ export default function DashProfile() {
 
   useEffect(() => {
     if (imageFile) {
-      uploadImage();
+      uploadProfileImage();
     }
   }, [imageFile]);
 
@@ -95,37 +89,22 @@ export default function DashProfile() {
     }
   };
 
-  const uploadImage = async () => {
+  const uploadProfileImage = async () => {
     setImageFileUploading(true);
     setImageFileUploadError(null);
     setImageFileUploadProgress(null);
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + imageFile.name;
-    const storageRef = ref(storage, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, imageFile);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setImageFileUploadProgress(progress.toFixed(0));
-      },
-      () => {
-        setImageFileUploadError("Otpremanje slike nije uspelo");
-        setImageFileUploadProgress(null);
-        setImageFile(null);
-        setImageFileUrl(null);
-        setImageFileUploading(false);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-          setImageFileUrl(url);
-          setFormData({ ...formData, profilePicture: url });
-          setImageFileUploading(false);
-        });
-      },
-    );
+    try {
+      const url = await uploadImage(imageFile, setImageFileUploadProgress);
+      setImageFileUrl(url);
+      setFormData((prev) => ({ ...prev, profilePicture: url }));
+    } catch {
+      setImageFileUploadError("Otpremanje slike nije uspelo");
+      setImageFile(null);
+      setImageFileUrl(null);
+    } finally {
+      setImageFileUploading(false);
+      setImageFileUploadProgress(null);
+    }
   };
 
   const handleDeleteUser = async () => {
