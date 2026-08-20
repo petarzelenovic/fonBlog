@@ -29,6 +29,7 @@ import {
 import { useDispatch } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
+import { USERNAME_PATTERN } from "../constants";
 
 export default function DashProfile() {
   const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -68,6 +69,12 @@ export default function DashProfile() {
     setUpdateUserError("");
     if (Object.keys(formData).length === 0) {
       setUpdateUserError("No changes made");
+      return;
+    }
+    if (formData.username && !USERNAME_PATTERN.test(formData.username)) {
+      setUpdateUserError(
+        "Korisničko ime može sadržati samo slova, brojeve, tačku i donju crtu",
+      );
       return;
     }
     try {

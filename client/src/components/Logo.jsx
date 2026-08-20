@@ -1,4 +1,6 @@
-export default function Logo({ className = "h-10 w-auto" }) {
+export default function Logo({ className = "h-10 w-auto", variant = "default" }) {
+  const onDark = variant === "onDark";
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -15,7 +17,7 @@ export default function Logo({ className = "h-10 w-auto" }) {
       >
         <path
           d="M10 55 C60 33 111 44 142 76 V216 C104 185 58 178 10 196Z"
-          className="stroke-[#004A7C] dark:stroke-white"
+          className={onDark ? "stroke-white" : "stroke-[#004A7C] dark:stroke-white"}
           strokeWidth="14"
         />
         <path
@@ -50,7 +52,11 @@ export default function Logo({ className = "h-10 w-auto" }) {
         fontWeight="760"
         letterSpacing="-4"
       >
-        <text x="327" y="178" className="fill-[#004A7C] dark:fill-white">
+        <text
+          x="327"
+          y="178"
+          className={onDark ? "fill-white" : "fill-[#004A7C] dark:fill-white"}
+        >
           Fon
         </text>
         <text x="516" y="178" fill="#D058A0">

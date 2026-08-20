@@ -1,10 +1,16 @@
 import mongoose from "mongoose";
+import { USERNAME_PATTERN } from "../utils/username.js";
+
 const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
       required: true,
       unique: true,
+      match: [
+        USERNAME_PATTERN,
+        "Korisničko ime može sadržati samo slova, brojeve, tačku i donju crtu",
+      ],
     },
     email: {
       type: String,

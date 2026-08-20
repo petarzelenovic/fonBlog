@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import { errorHandler } from "../utils/error.js";
 import jwt from "jsonwebtoken";
+import { isValidUsername } from "../utils/username.js";
 
 export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -10,9 +11,24 @@ export const signup = async (req, res, next) => {
     return next(errorHandler(400, "All fields are required"));
   }
 
+  const normalizedUsername = username.trim().toLowerCase();
+
+  if (!isValidUsername(normalizedUsername)) {
+    return next(
+      errorHandler(
+        400,
+        "Korisničko ime može sadržati samo slova, brojeve, tačku i donju crtu",
+      ),
+    );
+  }
+
   const hashedPassword = bcryptjs.hashSync(password, 10);
 
-  const user = new User({ username, email, password: hashedPassword });
+  const user = new User({
+    username: normalizedUsername,
+    email,
+    password: hashedPassword,
+  });
   try {
     await user.save();
     res.status(201).json({ message: "User created successfully" });
@@ -35,7 +51,7 @@ export const signin = async (req, res, next) => {
     }
     const isPasswordCorrect = bcryptjs.compareSync(password, user.password);
     if (!isPasswordCorrect) {
-      return next(errorHandler(400, "Wrong credentials"));
+      return next(errorHandler(400, "Pogrešni kredencijali"));
     }
     const token = jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
@@ -72,10 +88,11 @@ export const googleAuth = async (req, res, next) => {
       const generatedPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
 
+      const sanitizedUsername =
+        username.replace(/[^a-zA-Z0-9._]/g, "").toLowerCase() || "user";
+
       const newUser = new User({
-        username:
-          username.split(" ").join("").toLowerCase() +
-          Math.random().toString(9).slice(-4),
+        username: sanitizedUsername + Math.random().toString(9).slice(-4),
         email,
         password: hashedPassword,
         profilePicture: googlePhotoUrl,
