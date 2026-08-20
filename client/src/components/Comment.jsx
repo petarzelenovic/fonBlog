@@ -3,24 +3,14 @@ import { Button, Dropdown, DropdownItem, Textarea } from "flowbite-react";
 import { FaThumbsUp } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { useSelector } from "react-redux";
-
-const defaultAvatar =
-  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
-
-function formatCommentDate(dateString) {
-  return new Date(dateString).toLocaleDateString("sr-Latn", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
+import { formatDate } from "../utils/formatDate.js";
 
 export default function Comment({ comment, onLike, onEdit, onDelete }) {
   const { currentUser } = useSelector((state) => state.user);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
   const username = comment.userId?.username || "obrisan korisnik";
-  const profilePicture = comment.userId?.profilePicture || defaultAvatar;
+  const profilePicture = comment.userId?.profilePicture;
   const likedByCurrentUser =
     currentUser && comment.likes?.includes(currentUser._id);
   const ownerId = comment.userId?._id;
@@ -59,7 +49,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
           </p>
           <p className="text-sm text-fon-muted dark:text-fon-dark-muted">
             <time dateTime={comment.createdAt}>
-              {formatCommentDate(comment.createdAt)}
+              {formatDate(comment.createdAt)}
             </time>
           </p>
         </div>
@@ -122,7 +112,9 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
         </>
       ) : (
         <>
-          <p className="text-fon-muted dark:text-fon-dark-muted">{comment.content}</p>
+          <p className="text-fon-muted dark:text-fon-dark-muted">
+            {comment.content}
+          </p>
           <div className="mt-4 flex items-center space-x-4">
             <button
               type="button"

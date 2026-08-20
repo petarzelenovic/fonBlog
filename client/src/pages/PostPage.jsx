@@ -171,7 +171,7 @@ export default function PostPage() {
   };
 
   return (
-    <main className="bg-fon-bg dark:bg-fon-dark">
+    <main className="bg-white dark:bg-fon-dark">
       <section className="relative isolate h-96 w-full overflow-hidden sm:h-112 lg:h-128">
         <img
           src={post.image}

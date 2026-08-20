@@ -9,7 +9,7 @@ export default function ThemeProvider({ children }) {
   }, [theme]);
 
   return (
-    <div className="min-h-screen bg-fon-bg text-fon-text dark:bg-fon-dark dark:text-fon-dark-text">
+    <div className="min-h-screen bg-white text-fon-text dark:bg-fon-dark dark:text-fon-dark-text">
       {children}
     </div>
   );

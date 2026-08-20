@@ -1,9 +1,9 @@
 import { Button, Select, Spinner, TextInput } from "flowbite-react";
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PostCard from "../components/PostCard.jsx";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
+import { fetchAuthorsByIds } from "../utils/fetchAuthors.js";
 
 export default function Search() {
   const { categories } = useCategories();
@@ -16,6 +16,7 @@ export default function Search() {
   });
 
   const [posts, setPosts] = useState([]);
+  const [authors, setAuthors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
@@ -41,6 +42,12 @@ export default function Search() {
       }
       const data = await response.json();
       setPosts(data.posts);
+      setAuthors(
+        await fetchAuthorsByIds(
+          data.posts.map((post) => post.userId),
+          {},
+        ),
+      );
       setLoading(false);
       if (data.totalPosts <= 9) {
         setShowMore(false);
@@ -93,6 +100,12 @@ export default function Search() {
       return;
     }
     const data = await response.json();
+    setAuthors(
+      await fetchAuthorsByIds(
+        data.posts.map((post) => post.userId),
+        authors,
+      ),
+    );
     setPosts([...posts, ...data.posts]);
     if (data.posts.length === 9) {
       setShowMore(true);
@@ -142,20 +155,29 @@ export default function Search() {
       </div>
       <div className="w-full">
         <h1 className="mt-5 p-3 text-3xl font-semibold text-fon-navy dark:text-white">Search Results</h1>
-        <div className="p-7 flex flex-wrap gap-4">
+        <div className="p-7">
           {!loading && posts.length === 0 && (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex h-full items-center justify-center">
               <p className="text-fon-muted">No posts found</p>
             </div>
           )}
           {loading && (
-            <div className="flex justify-center items-center h-full">
+            <div className="flex h-full items-center justify-center">
               <Spinner size="lg" />
             </div>
           )}
-          {!loading &&
-            posts.length > 0 &&
-            posts.map((post) => <PostCard key={post._id} post={post} />)}
+          {!loading && posts.length > 0 && (
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+              {posts.map((post) => (
+                <PostCard
+                  key={post._id}
+                  post={post}
+                  author={authors[post.userId]}
+                  layout="grid"
+                />
+              ))}
+            </div>
+          )}
           {showMore && (
             <button
               onClick={handleShowMore}

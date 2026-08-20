@@ -19,7 +19,7 @@
   --color-fon-muted: #617486;
   --color-fon-border: #dce5ea;
   --color-fon-dark: #0e1a24;
-  --color-fon-dark-surface: #162533;
+  --color-fon-dark-surface: #0e1a24;
   --color-fon-dark-border: #2a3f4e;
   --color-fon-dark-text: #e8eef2;
   --color-fon-dark-muted: #9aadc0;
@@ -49,7 +49,7 @@
   html,
   body,
   #root {
-    @apply min-h-screen bg-fon-bg text-fon-text dark:bg-fon-dark dark:text-fon-dark-text;
+    @apply min-h-screen bg-white text-fon-text dark:bg-fon-dark dark:text-fon-dark-text;
   }
 }
 

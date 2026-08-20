@@ -9,7 +9,7 @@ export default function FooterComponent() {
   const { categories } = useCategories();
 
   return (
-    <footer className="bg-gray-50 dark:bg-gray-800">
+    <footer className="bg-fon-bg dark:bg-gray-800">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid items-center gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">

@@ -59,7 +59,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-gray-50 dark:bg-gray-800">
+    <header className="sticky top-0 z-30 bg-fon-bg dark:bg-gray-800">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link to="/" className="inline-flex shrink-0 items-center">
           <Logo className="h-10 w-auto" />
