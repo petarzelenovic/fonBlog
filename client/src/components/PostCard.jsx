@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
 import { formatDate } from "../utils/formatDate.js";
+import CoverImage from "./CoverImage.jsx";
 
 export default function PostCard({ post, layout = "list" }) {
   const { getCategoryColor, getCategoryName } = useCategories();
@@ -24,11 +25,7 @@ export default function PostCard({ post, layout = "list" }) {
             : "block shrink-0 overflow-hidden rounded-lg sm:w-56 lg:w-72"
         }
       >
-        <img
-          src={post.image}
-          alt={post.title}
-          className="aspect-4/3 h-full w-full object-cover transition duration-300 hover:scale-[1.02]"
-        />
+        <CoverImage src={post.image} alt={post.title} />
       </Link>
 
       <div className="min-w-0 flex-1">
