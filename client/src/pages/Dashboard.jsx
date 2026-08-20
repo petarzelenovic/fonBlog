@@ -5,6 +5,7 @@ import DashProfile from "../components/DashProfile";
 import DashPosts from "../components/DashPosts";
 import DashUsers from "../components/DashUsers";
 import DashComments from "../components/DashComments";
+import DashCategories from "../components/DashCategories";
 import DashboardOverview from "../components/DashboardOverview";
 
 const TAB_META = {
@@ -28,9 +29,20 @@ const TAB_META = {
     title: "Komentari",
     subtitle: "Pregled i upravljanje komentarima",
   },
+  categories: {
+    title: "Kategorije",
+    subtitle: "Dodaj, izmeni ili obriši kategorije objava",
+  },
 };
 
-const ADMIN_TABS = ["profile", "overview", "posts", "users", "comments"];
+const ADMIN_TABS = [
+  "profile",
+  "overview",
+  "posts",
+  "users",
+  "comments",
+  "categories",
+];
 const USER_TABS = ["profile"];
 
 export default function Dashboard() {
@@ -64,6 +76,7 @@ export default function Dashboard() {
         {tab === "posts" && <DashPosts />}
         {tab === "users" && <DashUsers />}
         {tab === "comments" && <DashComments />}
+        {tab === "categories" && <DashCategories />}
       </div>
     </main>
   );

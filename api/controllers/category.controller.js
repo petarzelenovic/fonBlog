@@ -4,8 +4,20 @@ import Post from "../models/post.model.js";
 
 export const getCategories = async (req, res, next) => {
   try {
-    const categories = await Category.find().sort({ name: 1 });
-    res.status(200).json(categories);
+    const [categories, counts] = await Promise.all([
+      Category.find().sort({ name: 1 }).lean(),
+      Post.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]),
+    ]);
+    const countBySlug = Object.fromEntries(
+      counts.map((item) => [item._id, item.count]),
+    );
+
+    res.status(200).json(
+      categories.map((category) => ({
+        ...category,
+        postsCount: countBySlug[category.slug] || 0,
+      })),
+    );
   } catch (error) {
     next(error);
   }

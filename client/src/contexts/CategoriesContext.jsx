@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { DEFAULT_CATEGORY_COLOR } from "../constants.js";
 
 const CategoriesContext = createContext(null);
 
@@ -6,39 +7,41 @@ export function CategoriesProvider({ children }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/categories");
-        const data = await response.json();
-        if (response.ok) {
-          setCategories(data);
-        }
-      } catch (error) {
-        console.log(error.message);
-      } finally {
-        setLoading(false);
+  const refreshCategories = useCallback(async () => {
+    try {
+      const response = await fetch("/api/categories");
+      const data = await response.json();
+      if (response.ok) {
+        setCategories(data);
       }
-    };
-
-    fetchCategories();
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    refreshCategories();
+  }, [refreshCategories]);
 
   const value = useMemo(() => {
     const getCategoryName = (slug) =>
       categories.find((category) => category.slug === slug)?.name ?? slug;
 
     const getCategoryColor = (slug) =>
-      categories.find((category) => category.slug === slug)?.color ?? "#004A7C";
+      categories.find((category) => category.slug === slug)?.color ??
+      DEFAULT_CATEGORY_COLOR;
 
     return {
       categories,
       loading,
+      refreshCategories,
       defaultCategorySlug: categories[0]?.slug ?? "",
       getCategoryName,
       getCategoryColor,
     };
-  }, [categories, loading]);
+  }, [categories, loading, refreshCategories]);
 
   return (
     <CategoriesContext.Provider value={value}>

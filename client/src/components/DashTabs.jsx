@@ -6,6 +6,7 @@ const tabs = [
   { id: "posts", label: "Objave", adminOnly: true },
   { id: "users", label: "Korisnici", adminOnly: true },
   { id: "comments", label: "Komentari", adminOnly: true },
+  { id: "categories", label: "Kategorije", adminOnly: true },
 ];
 
 export default function DashTabs({ activeTab, isAdmin }) {
