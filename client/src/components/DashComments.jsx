@@ -75,10 +75,15 @@ export default function DashComments() {
         console.log(data.message);
         return;
       }
+      const deletedCount = data.deletedCount || 1;
       setComments((prev) =>
-        prev.filter((comment) => comment._id !== commentIdToDelete),
+        prev.filter(
+          (comment) =>
+            comment._id !== commentIdToDelete &&
+            String(comment.parentId || "") !== String(commentIdToDelete),
+        ),
       );
-      setTotalComments((prev) => Math.max(0, prev - 1));
+      setTotalComments((prev) => Math.max(0, prev - deletedCount));
     } catch (error) {
       console.log(error.message);
     }
@@ -184,7 +189,7 @@ export default function DashComments() {
         show={showModal}
         onClose={() => setShowModal(false)}
         onConfirm={handleDeleteComment}
-        message="Da li si siguran da želiš da obrišeš ovaj komentar? Ova radnja se ne može opozvati."
+        message="Da li si siguran da želiš da obrišeš ovaj komentar? Ako ima odgovore, i oni će biti obrisani. Ova radnja se ne može opozvati."
       />
     </>
   );

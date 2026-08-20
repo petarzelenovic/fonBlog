@@ -3,12 +3,25 @@ import { Button, Dropdown, DropdownItem, Textarea } from "flowbite-react";
 import { FaThumbsUp } from "react-icons/fa";
 import { HiDotsHorizontal } from "react-icons/hi";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/formatDate.js";
 
-export default function Comment({ comment, onLike, onEdit, onDelete }) {
+export default function Comment({
+  comment,
+  replies = [],
+  onLike,
+  onEdit,
+  onDelete,
+  onReply,
+}) {
   const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
+  const [replyContent, setReplyContent] = useState("");
+  const [replyError, setReplyError] = useState(null);
+  const [replying, setReplying] = useState(false);
   const username = comment.userId?.username || "obrisan korisnik";
   const profilePicture = comment.userId?.profilePicture;
   const likedByCurrentUser =
@@ -16,6 +29,8 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
   const ownerId = comment.userId?._id;
   const canModify =
     currentUser && (currentUser._id === ownerId || currentUser.isAdmin);
+  const canReply = Boolean(onReply);
+  const isReply = Boolean(comment.parentId);
 
   const handleSave = async () => {
     try {
@@ -35,8 +50,35 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
     }
   };
 
+  const handleReplyClick = () => {
+    if (!currentUser) {
+      navigate("/sign-in");
+      return;
+    }
+    setIsEditing(false);
+    setIsReplying((open) => !open);
+    setReplyError(null);
+  };
+
+  const handleReplySubmit = async (e) => {
+    e.preventDefault();
+    if (!replyContent.trim() || replying) return;
+
+    try {
+      setReplying(true);
+      setReplyError(null);
+      await onReply(comment._id, replyContent.trim());
+      setReplyContent("");
+      setIsReplying(false);
+    } catch (error) {
+      setReplyError(error.message);
+    } finally {
+      setReplying(false);
+    }
+  };
+
   return (
-    <article className="py-6 text-base">
+    <article className={isReply ? "py-4 text-base" : "py-6 text-base"}>
       <footer className="mb-2 flex items-center justify-between">
         <div className="flex items-center">
           <p className="mr-3 inline-flex items-center text-sm font-semibold text-fon-navy dark:text-white">
@@ -67,6 +109,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
             <DropdownItem
               onClick={() => {
                 setIsEditing(true);
+                setIsReplying(false);
                 setEditedContent(comment.content);
               }}
             >
@@ -130,8 +173,76 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
                 ? `${comment.numberOfLikes} ${comment.numberOfLikes === 1 ? "sviđanje" : "sviđanja"}`
                 : "Sviđa mi se"}
             </button>
+            {canReply && (
+              <button
+                type="button"
+                onClick={handleReplyClick}
+                className="cursor-pointer text-sm font-medium text-gray-500 hover:underline dark:text-gray-400"
+              >
+                Odgovori
+              </button>
+            )}
           </div>
         </>
+      )}
+
+      {isReplying && (
+        <form className="mt-4" onSubmit={handleReplySubmit}>
+          <Textarea
+            className="mb-2"
+            placeholder={`Odgovor za ${username}...`}
+            rows={3}
+            maxLength="200"
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+          />
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs text-fon-muted dark:text-fon-dark-muted">
+              {200 - replyContent.length} karaktera preostalo
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="xs"
+                color="gray"
+                onClick={() => {
+                  setIsReplying(false);
+                  setReplyContent("");
+                  setReplyError(null);
+                }}
+              >
+                Otkaži
+              </Button>
+              <Button
+                type="submit"
+                size="xs"
+                className="bg-fon-navy text-white hover:bg-fon-navy-hover"
+                disabled={replyContent.trim().length === 0 || replying}
+              >
+                Objavi odgovor
+              </Button>
+            </div>
+          </div>
+          {replyError && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-500">
+              {replyError}
+            </p>
+          )}
+        </form>
+      )}
+
+      {replies.length > 0 && (
+        <div className="mt-2 ml-4 border-l border-fon-border pl-4 sm:ml-8 dark:border-fon-dark-border">
+          {replies.map((reply) => (
+            <Comment
+              key={reply._id}
+              comment={reply}
+              onLike={onLike}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
       )}
     </article>
   );

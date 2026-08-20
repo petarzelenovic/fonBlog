@@ -5,7 +5,7 @@ import { errorHandler } from "../utils/error.js";
 
 export const createComment = async (req, res, next) => {
   try {
-    const { content, postId, userId } = req.body;
+    const { content, postId, userId, parentId } = req.body;
     if (userId !== req.user.id) {
       return next(
         errorHandler(
@@ -14,8 +14,43 @@ export const createComment = async (req, res, next) => {
         ),
       );
     }
+    if (!content || content.trim().length === 0) {
+      return next(errorHandler(400, "Comment cannot be empty"));
+    }
+    if (content.length > 200) {
+      return next(
+        errorHandler(400, "Comment cannot be more than 200 characters"),
+      );
+    }
+    if (!postId) {
+      return next(errorHandler(400, "Post is required"));
+    }
 
-    const newComment = new Comment({ content, postId, userId });
+    let resolvedParentId = null;
+    if (parentId) {
+      const parent = await Comment.findById(parentId);
+      if (!parent) {
+        return next(errorHandler(404, "Parent comment not found"));
+      }
+      if (parent.postId.toString() !== String(postId)) {
+        return next(
+          errorHandler(400, "Reply must belong to the same post"),
+        );
+      }
+      if (parent.parentId) {
+        return next(
+          errorHandler(400, "Replies to replies are not allowed"),
+        );
+      }
+      resolvedParentId = parent._id;
+    }
+
+    const newComment = new Comment({
+      content: content.trim(),
+      postId,
+      userId,
+      parentId: resolvedParentId,
+    });
     await newComment.save();
     res.status(201).json(newComment);
   } catch (error) {
@@ -97,8 +132,13 @@ export const deleteComment = async (req, res, next) => {
         errorHandler(403, "You are not allowed to delete this comment"),
       );
     }
-    await Comment.findByIdAndDelete(req.params.commentId);
-    res.status(200).json("Comment has been deleted");
+    const result = await Comment.deleteMany({
+      $or: [{ _id: comment._id }, { parentId: comment._id }],
+    });
+    res.status(200).json({
+      message: "Comment has been deleted",
+      deletedCount: result.deletedCount,
+    });
   } catch (error) {
     next(error);
   }

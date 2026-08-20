@@ -5,6 +5,50 @@ import { Link, useNavigate } from "react-router-dom";
 import Comment from "./Comment";
 import ConfirmModal from "./ConfirmModal";
 
+function getParentId(comment) {
+  return comment?.parentId ? String(comment.parentId) : null;
+}
+
+function buildCommentThreads(comments) {
+  const ids = new Set(comments.map((item) => String(item._id)));
+  const repliesByParent = new Map();
+  const topLevel = [];
+
+  comments.forEach((comment) => {
+    const parentId = getParentId(comment);
+    if (!parentId || !ids.has(parentId)) {
+      topLevel.push(comment);
+      return;
+    }
+    const replies = repliesByParent.get(parentId) || [];
+    replies.push(comment);
+    repliesByParent.set(parentId, replies);
+  });
+
+  topLevel.sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  );
+  repliesByParent.forEach((replies) => {
+    replies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  });
+
+  return topLevel.map((comment) => ({
+    comment,
+    replies: repliesByParent.get(String(comment._id)) || [],
+  }));
+}
+
+function withCurrentUser(comment, currentUser) {
+  return {
+    ...comment,
+    userId: {
+      _id: currentUser._id,
+      username: currentUser.username,
+      profilePicture: currentUser.profilePicture,
+    },
+  };
+}
+
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
@@ -13,6 +57,11 @@ export default function CommentSection({ postId }) {
   const [comment, setComment] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState(null);
+
+  const threads = buildCommentThreads(comments);
+  const deleteHasReplies = comments.some(
+    (item) => getParentId(item) === String(commentToDelete),
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,23 +81,33 @@ export default function CommentSection({ postId }) {
       if (response.ok) {
         setComment("");
         setCommentError(null);
-        setComments((prev) => [
-          {
-            ...data,
-            userId: {
-              _id: currentUser._id,
-              username: currentUser.username,
-              profilePicture: currentUser.profilePicture,
-            },
-          },
-          ...prev,
-        ]);
+        setComments((prev) => [withCurrentUser(data, currentUser), ...prev]);
       } else {
         setCommentError(data.message);
       }
     } catch (error) {
       setCommentError(error.message);
     }
+  };
+
+  const handleReply = async (parentId, content) => {
+    const response = await fetch(`/api/comment/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content,
+        postId,
+        userId: currentUser._id,
+        parentId,
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Odgovor nije sačuvan");
+    }
+    setComments((prev) => [...prev, withCurrentUser(data, currentUser)]);
   };
 
   const handleEdit = (commentId, editedContent) => {
@@ -70,7 +129,12 @@ export default function CommentSection({ postId }) {
         method: "DELETE",
       });
       if (res.ok) {
-        setComments((prev) => prev.filter((c) => c._id !== commentId));
+        setComments((prev) =>
+          prev.filter(
+            (c) =>
+              c._id !== commentId && getParentId(c) !== String(commentId),
+          ),
+        );
       }
     } catch (error) {
       console.log(error.message);
@@ -179,12 +243,14 @@ export default function CommentSection({ postId }) {
         </p>
       ) : (
         <div className="divide-y divide-fon-border dark:divide-fon-dark-border">
-          {comments.map((commentItem) => (
+          {threads.map(({ comment: commentItem, replies }) => (
             <Comment
               key={commentItem._id}
               comment={commentItem}
+              replies={replies}
               onLike={handleLike}
               onEdit={handleEdit}
+              onReply={handleReply}
               onDelete={(commentId) => {
                 setShowModal(true);
                 setCommentToDelete(commentId);
@@ -198,7 +264,11 @@ export default function CommentSection({ postId }) {
         show={showModal}
         onClose={() => setShowModal(false)}
         onConfirm={() => handleDelete(commentToDelete)}
-        message="Da li si siguran da želiš da obrišeš ovaj komentar? Ova radnja se ne može opozvati."
+        message={
+          deleteHasReplies
+            ? "Da li si siguran da želiš da obrišeš ovaj komentar? Obrisaće se i svi odgovori. Ova radnja se ne može opozvati."
+            : "Da li si siguran da želiš da obrišeš ovaj komentar? Ova radnja se ne može opozvati."
+        }
       />
     </section>
   );
