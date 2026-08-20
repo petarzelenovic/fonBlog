@@ -82,10 +82,10 @@ export default function Home() {
         <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           <div>
             <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
-              Fon Blog
+              Priče sa FON-a
             </h1>
             <p className="mt-2 max-w-2xl text-base font-light text-gray-200 md:text-lg">
-              Vesti, iskustva i priče sa Fakulteta organizacionih nauka
+              Sve što biste voleli da ste znali o studiranju na FON-u.
             </p>
           </div>
         </div>
