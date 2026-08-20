@@ -44,7 +44,7 @@ export default function DashTable({
             Pretraga
           </Label>
           <div className="relative w-full">
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+            <div className="pointer-events-none absolute inset-y-0 inset-s-0 flex items-center ps-3">
               <HiOutlineSearch className="h-4 w-4 text-gray-500 dark:text-gray-400" />
             </div>
             <input

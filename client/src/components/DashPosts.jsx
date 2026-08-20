@@ -226,7 +226,9 @@ export default function DashPosts() {
         <Table hoverable className="w-full table-fixed">
           <TableHead>
             <TableRow>
-              <TableHeadCell className="h-11 w-36 py-0">Ažurirano</TableHeadCell>
+              <TableHeadCell className="h-11 w-36 py-0">
+                Ažurirano
+              </TableHeadCell>
               <TableHeadCell className="h-11 py-0">Objava</TableHeadCell>
               <TableHeadCell className="h-11 w-44 py-0">
                 Kategorija
@@ -239,10 +241,10 @@ export default function DashPosts() {
           <TableBody>
             {userPosts.map((post) => (
               <TableRow key={post._id} className="bg-white dark:bg-gray-800">
-                <TableCell className="h-[72px] py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                <TableCell className="h-18 py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
                   {formatDate(post.updatedAt)}
                 </TableCell>
-                <TableCell className="h-[72px] max-w-0 py-0">
+                <TableCell className="h-18 max-w-0 py-0">
                   <Link
                     to={`/post/${post.slug}`}
                     className="flex min-w-0 items-center gap-3"
@@ -257,10 +259,10 @@ export default function DashPosts() {
                     </span>
                   </Link>
                 </TableCell>
-                <TableCell className="h-[72px] py-0">
+                <TableCell className="h-18 py-0">
                   <CategoryBadge slug={post.category} />
                 </TableCell>
-                <TableCell className="h-[72px] py-0">
+                <TableCell className="h-18 py-0">
                   <div className="flex items-center justify-end gap-4">
                     <Link
                       className="font-medium text-blue-600 hover:underline dark:text-blue-500"

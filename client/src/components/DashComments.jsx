@@ -116,7 +116,9 @@ export default function DashComments() {
         <Table hoverable className="w-full table-fixed">
           <TableHead>
             <TableRow>
-              <TableHeadCell className="h-11 w-36 py-0">Ažurirano</TableHeadCell>
+              <TableHeadCell className="h-11 w-36 py-0">
+                Ažurirano
+              </TableHeadCell>
               <TableHeadCell className="h-11 py-0">Komentar</TableHeadCell>
               <TableHeadCell className="h-11 w-44 py-0">Autor</TableHeadCell>
               <TableHeadCell className="h-11 py-0">Objava</TableHeadCell>
@@ -129,15 +131,15 @@ export default function DashComments() {
           <TableBody>
             {comments.map((comment) => (
               <TableRow key={comment._id} className="bg-white dark:bg-gray-800">
-                <TableCell className="h-[72px] py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                <TableCell className="h-18 py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
                   {formatDate(comment.updatedAt)}
                 </TableCell>
-                <TableCell className="h-[72px] max-w-0 py-0">
+                <TableCell className="h-18 max-w-0 py-0">
                   <p className="line-clamp-2 text-gray-900 dark:text-white">
                     {comment.content}
                   </p>
                 </TableCell>
-                <TableCell className="h-[72px] py-0">
+                <TableCell className="h-18 py-0">
                   <div className="flex min-w-0 items-center gap-3">
                     {comment.userId?.profilePicture && (
                       <img
@@ -151,7 +153,7 @@ export default function DashComments() {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="h-[72px] max-w-0 py-0">
+                <TableCell className="h-18 max-w-0 py-0">
                   {comment.postId?.slug ? (
                     <Link
                       className="block truncate font-medium text-blue-600 hover:underline dark:text-blue-500"
@@ -165,10 +167,10 @@ export default function DashComments() {
                     </span>
                   )}
                 </TableCell>
-                <TableCell className="h-[72px] py-0 text-gray-500 dark:text-gray-400">
+                <TableCell className="h-18 py-0 text-gray-500 dark:text-gray-400">
                   {comment.numberOfLikes}
                 </TableCell>
-                <TableCell className="h-[72px] py-0 text-right">
+                <TableCell className="h-18 py-0 text-right">
                   <button
                     type="button"
                     className="cursor-pointer font-medium text-red-600 hover:underline dark:text-red-500"

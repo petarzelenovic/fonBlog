@@ -119,10 +119,10 @@ export default function DashUsers() {
           <TableBody>
             {users.map((user) => (
               <TableRow key={user._id} className="bg-white dark:bg-gray-800">
-                <TableCell className="h-[72px] py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                <TableCell className="h-18 py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
                   {formatDate(user.createdAt)}
                 </TableCell>
-                <TableCell className="h-[72px] max-w-0 py-0">
+                <TableCell className="h-18 max-w-0 py-0">
                   <div className="flex min-w-0 items-center gap-3">
                     <img
                       src={user.profilePicture}
@@ -134,10 +134,10 @@ export default function DashUsers() {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell className="h-[72px] truncate py-0 text-gray-500 dark:text-gray-400">
+                <TableCell className="h-18 truncate py-0 text-gray-500 dark:text-gray-400">
                   {user.email}
                 </TableCell>
-                <TableCell className="h-[72px] py-0">
+                <TableCell className="h-18 py-0">
                   {user.isAdmin ? (
                     <span className="rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-900 dark:border-gray-600 dark:text-white">
                       Admin
@@ -148,7 +148,7 @@ export default function DashUsers() {
                     </span>
                   )}
                 </TableCell>
-                <TableCell className="h-[72px] py-0 text-right">
+                <TableCell className="h-18 py-0 text-right">
                   {user._id !== currentUser._id && (
                     <button
                       type="button"
