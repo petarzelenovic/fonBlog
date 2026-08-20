@@ -3,8 +3,7 @@ import { useCategories } from "../contexts/CategoriesContext.jsx";
 import { formatDate } from "../utils/formatDate.js";
 
 export default function PostCard({ post, layout = "list" }) {
-  const { getCategoryColor, getCategoryName, getCategoryTextColor } =
-    useCategories();
+  const { getCategoryColor, getCategoryName } = useCategories();
   const excerpt = post.shortDescription?.trim();
   const isGrid = layout === "grid";
   const author = post.userId;
@@ -35,11 +34,8 @@ export default function PostCard({ post, layout = "list" }) {
       <div className="min-w-0 flex-1">
         <Link
           to={`/search?category=${post.category}`}
-          className="mb-3 inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium hover:opacity-90"
-          style={{
-            backgroundColor: getCategoryColor(post.category),
-            color: getCategoryTextColor(post.category),
-          }}
+          className="mb-3 inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium text-white hover:opacity-90"
+          style={{ backgroundColor: getCategoryColor(post.category) }}
         >
           {getCategoryName(post.category)}
         </Link>

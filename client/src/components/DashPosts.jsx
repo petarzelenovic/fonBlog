@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import {
-  Checkbox,
-  Label,
   Table,
   TableBody,
   TableCell,
@@ -15,12 +13,13 @@ import { HiChevronDown, HiFilter } from "react-icons/hi";
 import { POSTS_LIMIT } from "../constants.js";
 import { formatDate } from "../utils/formatDate.js";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
+import CategoryBadge from "./CategoryBadge";
 import ConfirmModal from "./ConfirmModal";
 import DashTable from "./DashTable";
 
 export default function DashPosts() {
   const { currentUser } = useSelector((state) => state.user);
-  const { categories, getCategoryName } = useCategories();
+  const { categories } = useCategories();
 
   const [userPosts, setUserPosts] = useState([]);
   const [totalPosts, setTotalPosts] = useState(0);
@@ -162,28 +161,33 @@ export default function DashPosts() {
               <HiChevronDown className="-mr-1 ml-1.5 h-5 w-5" />
             </button>
             {categoryOpen && (
-              <div className="absolute right-0 z-20 mt-2 w-52 rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-600 dark:bg-gray-700">
+              <div className="absolute right-0 z-20 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-md dark:border-gray-600 dark:bg-gray-700">
                 <div className="p-3">
                   <h6 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">
                     Kategorija
                   </h6>
-                  <ul className="space-y-2 text-sm">
-                    {categories.map((category) => (
-                      <li key={category._id} className="flex items-center">
-                        <Checkbox
-                          id={`filter-${category.slug}`}
-                          checked={selectedCategories.includes(category.slug)}
-                          onChange={() => toggleCategory(category.slug)}
-                        />
-                        <Label
-                          htmlFor={`filter-${category.slug}`}
-                          className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100"
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((category) => {
+                      const selected = selectedCategories.includes(
+                        category.slug,
+                      );
+                      return (
+                        <button
+                          key={category._id}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => toggleCategory(category.slug)}
+                          className={`cursor-pointer rounded-full ${
+                            selected
+                              ? "ring-2 ring-gray-900 ring-offset-2 dark:ring-white dark:ring-offset-gray-700"
+                              : "opacity-70 hover:opacity-100"
+                          }`}
                         >
-                          {category.name}
-                        </Label>
-                      </li>
-                    ))}
-                  </ul>
+                          <CategoryBadge slug={category.slug} />
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="border-t border-gray-200 px-3 py-2 dark:border-gray-600">
                   <button
@@ -253,8 +257,8 @@ export default function DashPosts() {
                     </span>
                   </Link>
                 </TableCell>
-                <TableCell className="h-[72px] truncate py-0">
-                  {getCategoryName(post.category)}
+                <TableCell className="h-[72px] py-0">
+                  <CategoryBadge slug={post.category} />
                 </TableCell>
                 <TableCell className="h-[72px] py-0">
                   <div className="flex items-center justify-end gap-4">

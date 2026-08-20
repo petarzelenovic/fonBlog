@@ -15,13 +15,12 @@ import {
   TableHeadCell,
   TableRow,
 } from "flowbite-react";
-import { useCategories } from "../contexts/CategoriesContext.jsx";
+import CategoryBadge from "./CategoryBadge";
 import DashStatCard from "./DashStatCard";
 import DashSectionCard from "./DashSectionCard";
 
 export default function DashboardOverview() {
   const { currentUser } = useSelector((state) => state.user);
-  const { getCategoryName } = useCategories();
   const [users, setUsers] = useState([]);
   const [comments, setComments] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -232,8 +231,8 @@ export default function DashboardOverview() {
                     </span>
                   </Link>
                 </TableCell>
-                <TableCell className="text-fon-muted dark:text-fon-dark-muted">
-                  {getCategoryName(post.category)}
+                <TableCell>
+                  <CategoryBadge slug={post.category} />
                 </TableCell>
               </TableRow>
             ))}

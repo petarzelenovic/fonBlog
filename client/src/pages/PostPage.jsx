@@ -44,8 +44,7 @@ function formatMetaDate(dateString) {
 }
 
 export default function PostPage() {
-  const { getCategoryColor, getCategoryName, getCategoryTextColor } =
-    useCategories();
+  const { getCategoryColor, getCategoryName } = useCategories();
   const { postSlug } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -167,11 +166,8 @@ export default function PostPage() {
           <div className="w-full lg:w-8/12 lg:pr-12">
             <Link
               to={`/search?category=${post.category}`}
-              className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium backdrop-blur-sm hover:opacity-90"
-              style={{
-                backgroundColor: getCategoryColor(post.category),
-                color: getCategoryTextColor(post.category),
-              }}
+              className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white backdrop-blur-sm hover:opacity-90"
+              style={{ backgroundColor: getCategoryColor(post.category) }}
             >
               {getCategoryName(post.category)}
             </Link>
