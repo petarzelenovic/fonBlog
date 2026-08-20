@@ -1,8 +1,11 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Spinner, Tooltip } from "flowbite-react";
 import { FaLink } from "react-icons/fa";
+import { HiOutlinePencil, HiOutlineTrash } from "react-icons/hi";
 import CommentSection from "../components/CommentSection";
+import ConfirmModal from "../components/ConfirmModal";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
 
 const defaultAvatar =
@@ -45,13 +48,16 @@ function formatMetaDate(dateString) {
 
 export default function PostPage() {
   const { getCategoryColor, getCategoryName } = useCategories();
+  const { currentUser } = useSelector((state) => state.user);
   const { postSlug } = useParams();
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [recentPosts, setRecentPosts] = useState([]);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [copied, setCopied] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -141,7 +147,7 @@ export default function PostPage() {
     .slice(0, 4);
   const shareUrl = `${window.location.origin}/post/${post.slug}`;
   const copyBtnClass =
-    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-fon-muted hover:bg-fon-bg hover:text-fon-navy dark:text-fon-dark-muted dark:hover:bg-fon-dark dark:hover:text-white";
+    "inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-fon-muted hover:bg-fon-bg hover:text-fon-navy dark:text-fon-dark-muted dark:hover:bg-fon-dark dark:hover:text-white";
 
   const copyLink = async () => {
     try {
@@ -153,7 +159,25 @@ export default function PostPage() {
     }
   };
 
+  const handleDeletePost = async () => {
+    setShowDeleteModal(false);
+    try {
+      const res = await fetch(`/api/posts/${post._id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        console.log(data.message);
+        return;
+      }
+      navigate("/dashboard?tab=posts");
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
   return (
+    <>
     <main className="bg-white dark:bg-fon-dark">
       <section className="relative isolate h-96 w-full overflow-hidden sm:h-112 lg:h-128">
         <img
@@ -205,16 +229,41 @@ export default function PostPage() {
                     </time>
                   </p>
                 </div>
-                <Tooltip content={copied ? "Kopirano" : "Kopiraj link"}>
-                  <button
-                    type="button"
-                    onClick={copyLink}
-                    className={copyBtnClass}
-                    aria-label={copied ? "Kopirano" : "Kopiraj link"}
-                  >
-                    <FaLink className="h-3.5 w-3.5" />
-                  </button>
-                </Tooltip>
+                <div className="flex items-center gap-1">
+                  {currentUser?.isAdmin && (
+                    <>
+                      <Tooltip content="Izmeni objavu">
+                        <Link
+                          to={`/update-post/${post._id}`}
+                          className={copyBtnClass}
+                          aria-label="Izmeni objavu"
+                        >
+                          <HiOutlinePencil className="h-4 w-4" />
+                        </Link>
+                      </Tooltip>
+                      <Tooltip content="Obriši objavu">
+                        <button
+                          type="button"
+                          onClick={() => setShowDeleteModal(true)}
+                          className={`${copyBtnClass} hover:text-red-600 dark:hover:text-red-400`}
+                          aria-label="Obriši objavu"
+                        >
+                          <HiOutlineTrash className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                    </>
+                  )}
+                  <Tooltip content={copied ? "Kopirano" : "Kopiraj link"}>
+                    <button
+                      type="button"
+                      onClick={copyLink}
+                      className={copyBtnClass}
+                      aria-label={copied ? "Kopirano" : "Kopiraj link"}
+                    >
+                      <FaLink className="h-3.5 w-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
 
               <div
@@ -301,5 +350,12 @@ export default function PostPage() {
         </div>
       </div>
     </main>
+    <ConfirmModal
+      show={showDeleteModal}
+      onClose={() => setShowDeleteModal(false)}
+      onConfirm={handleDeletePost}
+      message="Da li si siguran da želiš da obrišeš ovu objavu? Ova radnja se ne može opozvati."
+    />
+  </>
   );
 }
