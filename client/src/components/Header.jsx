@@ -8,6 +8,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon, FaSun } from "react-icons/fa";
+import { HiOutlineLogout, HiOutlineUser } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
 import { signOutSuccess } from "../redux/user/userSlice";
@@ -100,29 +101,55 @@ export default function Header() {
 
           {currentUser ? (
             <Dropdown
-              arrowIcon={false}
               inline
+              arrowIcon={false}
+              placement="bottom-end"
+              theme={{
+                floating: {
+                  base: "z-40 w-64 rounded-xl shadow-lg",
+                  style: {
+                    auto: "border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
+                  },
+                },
+              }}
               label={
                 <Avatar
                   img={currentUser.profilePicture}
-                  size="sm"
-                  alt="User avatar"
+                  alt="Profilna slika"
                   rounded
-                  className="cursor-pointer"
+                  size="sm"
+                  className="cursor-pointer rounded-full hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-500"
                 />
               }
             >
-              <DropdownHeader>
-                <span className="block text-sm">@{currentUser.username}</span>
-                <span className="block truncate text-sm font-medium">
-                  {currentUser.email}
-                </span>
+              <DropdownHeader className="flex items-center gap-3">
+                <Avatar
+                  img={currentUser.profilePicture}
+                  alt=""
+                  rounded
+                  size="md"
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                    {currentUser.username}
+                  </p>
+                  <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+                    {currentUser.email}
+                  </p>
+                </div>
               </DropdownHeader>
-              <DropdownItem>
-                <Link to="/dashboard?tab=profile">Profil</Link>
+              <DropdownItem
+                icon={HiOutlineUser}
+                onClick={() => navigate("/dashboard?tab=profile")}
+              >
+                Profil
               </DropdownItem>
               <DropdownDivider />
-              <DropdownItem onClick={handleSignOut} className="cursor-pointer">
+              <DropdownItem
+                icon={HiOutlineLogout}
+                onClick={handleSignOut}
+                className="text-red-600 hover:bg-red-50 focus:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 dark:focus:bg-red-950/40"
+              >
                 Odjavi se
               </DropdownItem>
             </Dropdown>
