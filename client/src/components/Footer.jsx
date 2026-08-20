@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
-import logo from "../assets/logo.svg";
+import Logo from "./Logo";
 
 const linkClass =
   "text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500";
@@ -14,7 +14,7 @@ export default function FooterComponent() {
         <div className="grid items-center gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">
             <Link to="/" className="inline-block">
-              <img src={logo} alt="Fon Blog" className="h-12 w-auto sm:h-14" />
+              <Logo className="h-12 w-auto sm:h-14" />
             </Link>
           </div>
 

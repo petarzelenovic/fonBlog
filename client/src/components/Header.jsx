@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toggleTheme } from "../redux/theme/themeSlice";
 import { signOutSuccess } from "../redux/user/userSlice";
 import { useState, useEffect } from "react";
-import logo from "../assets/logo.svg";
+import Logo from "./Logo";
 
 export default function Header() {
   const location = useLocation();
@@ -62,7 +62,7 @@ export default function Header() {
     <header className="sticky top-0 z-30 bg-gray-50 dark:bg-gray-800">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link to="/" className="inline-flex shrink-0 items-center">
-          <img src={logo} alt="Fon Blog" className="h-10 w-auto" />
+          <Logo className="h-10 w-auto" />
         </Link>
 
         <form
