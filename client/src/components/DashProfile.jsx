@@ -1,11 +1,4 @@
-import {
-  Alert,
-  Button,
-  Modal,
-  ModalBody,
-  ModalHeader,
-  TextInput,
-} from "flowbite-react";
+import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -27,9 +20,9 @@ import {
   signOutSuccess,
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { USERNAME_PATTERN } from "../constants";
+import ConfirmModal from "./ConfirmModal";
 
 export default function DashProfile() {
   const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -49,7 +42,7 @@ export default function DashProfile() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(e.target.files[0]);
+      setImageFile(file);
       setImageFileUrl(URL.createObjectURL(file));
     }
   };
@@ -63,12 +56,13 @@ export default function DashProfile() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdateUserSuccess("");
     setUpdateUserError("");
     if (Object.keys(formData).length === 0) {
-      setUpdateUserError("No changes made");
+      setUpdateUserError("Nema izmena za čuvanje");
       return;
     }
     if (formData.username && !USERNAME_PATTERN.test(formData.username)) {
@@ -90,12 +84,14 @@ export default function DashProfile() {
 
       if (!res.ok) {
         dispatch(updateFailure(data.message));
+        setUpdateUserError(data.message);
         return;
       }
       dispatch(updateSuccess(data));
-      setUpdateUserSuccess("Profile updated successfully");
-    } catch (error) {
-      dispatch(updateFailure(error.message));
+      setUpdateUserSuccess("Profil je uspešno ažuriran");
+    } catch (err) {
+      dispatch(updateFailure(err.message));
+      setUpdateUserError(err.message);
     }
   };
 
@@ -115,8 +111,8 @@ export default function DashProfile() {
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setImageFileUploadProgress(progress.toFixed(0));
       },
-      (error) => {
-        setImageFileUploadError("Couldn't upload image");
+      () => {
+        setImageFileUploadError("Otpremanje slike nije uspelo");
         setImageFileUploadProgress(null);
         setImageFile(null);
         setImageFileUrl(null);
@@ -131,6 +127,7 @@ export default function DashProfile() {
       },
     );
   };
+
   const handleDeleteUser = async () => {
     setShowModal(false);
     try {
@@ -146,11 +143,12 @@ export default function DashProfile() {
       }
       dispatch(deleteUserSuccess());
       navigate("/sign-in");
-    } catch (error) {
-      dispatch(deleteUserFailure(error.message));
+    } catch (err) {
+      dispatch(deleteUserFailure(err.message));
       setShowModal(false);
     }
   };
+
   const handleSignOut = async () => {
     try {
       const res = await fetch("/api/user/signout", {
@@ -163,14 +161,14 @@ export default function DashProfile() {
       }
       dispatch(signOutSuccess());
       navigate("/sign-in");
-    } catch (error) {
-      console.log(error.message);
+    } catch (err) {
+      console.log(err.message);
     }
   };
+
   return (
-    <div className="max-w-lg mx-auto p-3 w-full">
-      <h1 className="my-7 text-center font-semibold text-3xl">Profile</h1>
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+    <div className="mx-auto w-full max-w-lg">
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <input
           type="file"
           accept="image/*"
@@ -179,118 +177,119 @@ export default function DashProfile() {
           onChange={handleImageChange}
           ref={filePickerRef}
         />
-        <div
-          className="relative w-32 h-32 self-center cursor-pointer shadow-md overflow-hidden rounded-full"
-          onClick={() => filePickerRef.current.click()}
-        >
-          {imageFileUploadProgress && (
-            <CircularProgressbar
-              value={imageFileUploadProgress || 0}
-              text={`${imageFileUploadProgress}%`}
-              strokeWidth={5}
-              styles={{
-                root: {
-                  width: "100%",
-                  height: "100%",
-                  position: "absolute",
-                },
-                path: {
-                  stroke: `rgba(0, 74, 124, ${imageFileUploadProgress / 100})`,
-                },
-              }}
+        <div className="flex flex-col items-center gap-3">
+          <button
+            type="button"
+            className="relative h-28 w-28 cursor-pointer overflow-hidden rounded-full"
+            onClick={() => filePickerRef.current.click()}
+            aria-label="Promeni profilnu sliku"
+          >
+            {imageFileUploadProgress && (
+              <CircularProgressbar
+                value={imageFileUploadProgress || 0}
+                text={`${imageFileUploadProgress}%`}
+                strokeWidth={5}
+                styles={{
+                  root: {
+                    width: "100%",
+                    height: "100%",
+                    position: "absolute",
+                  },
+                  path: {
+                    stroke: `rgba(0, 74, 124, ${imageFileUploadProgress / 100})`,
+                  },
+                }}
+              />
+            )}
+            <img
+              src={imageFileUrl || currentUser.profilePicture}
+              alt="Profilna slika"
+              className={`h-full w-full rounded-full border-4 border-fon-border object-cover dark:border-fon-dark-border ${
+                imageFileUploading ? "opacity-60" : ""
+              }`}
             />
-          )}
-          <img
-            src={imageFileUrl || currentUser.profilePicture}
-            alt="Profile picture"
-            className="rounded-full w-full h-full border-8 border-[lightgray] object-cover"
-          />
+          </button>
+          <p className="text-xs text-fon-muted dark:text-fon-dark-muted">
+            Klikni na sliku da je promeniš
+          </p>
         </div>
         {imageFileUploadError && (
           <Alert color="failure">{imageFileUploadError}</Alert>
         )}
-        <TextInput
-          label="Name"
-          id="username"
-          placeholder="username"
-          defaultValue={currentUser.username}
-          onChange={handleChange}
-        />
-        <TextInput
-          label="Email"
-          id="email"
-          placeholder="email"
-          defaultValue={currentUser.email}
-          onChange={handleChange}
-          type="email"
-        />
-        <TextInput
-          label="Password"
-          id="password"
-          placeholder="*********"
-          type="password"
-          onChange={handleChange}
-        />
-        <Button type="submit" outline disabled={imageFileUploading || loading}>
-          {loading ? "Loading..." : "Update"}
+        <div>
+          <Label htmlFor="username">Korisničko ime</Label>
+          <TextInput
+            id="username"
+            placeholder="korisnicko.ime"
+            className="mt-2"
+            defaultValue={currentUser.username}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <Label htmlFor="email">Email adresa</Label>
+          <TextInput
+            id="email"
+            placeholder="ime@student.fon.bg.ac.rs"
+            className="mt-2"
+            defaultValue={currentUser.email}
+            onChange={handleChange}
+            type="email"
+          />
+        </div>
+        <div>
+          <Label htmlFor="password">Nova lozinka</Label>
+          <TextInput
+            id="password"
+            placeholder="••••••••"
+            className="mt-2"
+            type="password"
+            onChange={handleChange}
+          />
+        </div>
+        <Button
+          type="submit"
+          className="w-full cursor-pointer bg-fon-navy text-white hover:bg-fon-navy-hover"
+          disabled={imageFileUploading || loading}
+        >
+          {loading ? (
+            <>
+              <Spinner size="sm" className="mr-2" />
+              Čuvanje...
+            </>
+          ) : (
+            "Sačuvaj izmene"
+          )}
         </Button>
-        {currentUser.isAdmin && (
-          <Link to="/create-post">
-            <Button className="w-full">Create a post</Button>
-          </Link>
+        {updateUserSuccess && (
+          <Alert color="success">{updateUserSuccess}</Alert>
         )}
+        {updateUserError && <Alert color="failure">{updateUserError}</Alert>}
+        {error && <Alert color="failure">{error}</Alert>}
       </form>
-      <div className="text-red-500 flex justify-between mt-5">
-        <span className="cursor-pointer" onClick={() => setShowModal(true)}>
-          Delete Account
-        </span>
-        <span className="cursor-pointer" onClick={handleSignOut}>
-          Sign Out
-        </span>
+      <div className="mt-8 flex justify-between border-t border-fon-border pt-5 text-sm dark:border-fon-dark-border">
+        <button
+          type="button"
+          className="cursor-pointer font-medium text-red-500 hover:underline"
+          onClick={() => setShowModal(true)}
+        >
+          Obriši nalog
+        </button>
+        <button
+          type="button"
+          className="cursor-pointer font-medium text-fon-muted hover:text-fon-navy dark:text-fon-dark-muted dark:hover:text-white"
+          onClick={handleSignOut}
+        >
+          Odjavi se
+        </button>
       </div>
-      {updateUserSuccess && (
-        <Alert color="success" className="mt-5">
-          {updateUserSuccess}
-        </Alert>
-      )}
-      {updateUserError && (
-        <Alert color="failure" className="mt-5">
-          {updateUserError}
-        </Alert>
-      )}
 
-      {error && (
-        <Alert color="failure" className="mt-5">
-          {error}
-        </Alert>
-      )}
-
-      <Modal
+      <ConfirmModal
         show={showModal}
         onClose={() => setShowModal(false)}
-        popup
-        size="md"
-        dismissible
-      >
-        <ModalHeader />
-        <ModalBody>
-          <div className="text-center">
-            <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete your account? This cannot be
-              undone.
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button color="failure" onClick={handleDeleteUser}>
-                Yes, I&apos;m sure
-              </Button>
-              <Button color="gray" onClick={() => setShowModal(false)}>
-                No, cancel
-              </Button>
-            </div>
-          </div>
-        </ModalBody>
-      </Modal>
+        onConfirm={handleDeleteUser}
+        message="Da li si siguran da želiš da obrišeš nalog? Ova radnja se ne može opozvati."
+      />
     </div>
   );
 }

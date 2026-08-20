@@ -1,4 +1,6 @@
 import Comment from "../models/comment.model.js";
+import User from "../models/user.model.js";
+import Post from "../models/post.model.js";
 import { errorHandler } from "../utils/error.js";
 
 export const createComment = async (req, res, next) => {
@@ -110,15 +112,29 @@ export const getComments = async (req, res, next) => {
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
     const sortDirection = req.query.sort === "asc" ? 1 : -1;
+    const query = {};
 
-    const comments = await Comment.find()
+    if (req.query.searchTerm) {
+      const regex = { $regex: req.query.searchTerm, $options: "i" };
+      const [users, posts] = await Promise.all([
+        User.find({ username: regex }).select("_id"),
+        Post.find({ title: regex }).select("_id"),
+      ]);
+      query.$or = [
+        { content: regex },
+        { userId: { $in: users.map((user) => user._id) } },
+        { postId: { $in: posts.map((post) => post._id) } },
+      ];
+    }
+
+    const comments = await Comment.find(query)
       .populate("userId", "username profilePicture")
       .populate("postId", "title slug image")
       .sort({ createdAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
 
-    const totalComments = await Comment.countDocuments();
+    const totalComments = await Comment.countDocuments(query);
     const now = new Date();
     const oneMonthAgo = new Date(
       now.getFullYear(),

@@ -1,13 +1,6 @@
-import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useState } from "react";
 import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalHeader,
-  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -15,38 +8,60 @@ import {
   TableHeadCell,
   TableRow,
 } from "flowbite-react";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { Link } from "react-router-dom";
+import { POSTS_LIMIT } from "../constants.js";
+import { formatDate } from "../utils/formatDate.js";
+import ConfirmModal from "./ConfirmModal";
+import DashTable from "./DashTable";
 
 export default function DashComments() {
   const { currentUser } = useSelector((state) => state.user);
 
   const [comments, setComments] = useState([]);
+  const [totalComments, setTotalComments] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [commentIdToDelete, setCommentIdToDelete] = useState("");
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const startIndex = (currentPage - 1) * 9;
+        setLoading(true);
+        const params = new URLSearchParams({
+          startIndex: String((currentPage - 1) * POSTS_LIMIT),
+          limit: String(POSTS_LIMIT),
+        });
+        if (searchTerm) params.set("searchTerm", searchTerm);
+
         const response = await fetch(
-          `/api/comment/getcomments?startIndex=${startIndex}&limit=9`,
+          `/api/comment/getcomments?${params.toString()}`,
         );
         const data = await response.json();
         if (response.ok) {
           setComments(data.comments);
-          setTotalPages(Math.ceil(data.totalComments / 9) || 1);
+          setTotalComments(data.totalComments);
+          setTotalPages(Math.ceil(data.totalComments / POSTS_LIMIT) || 1);
         }
       } catch (error) {
         console.log(error.message);
+      } finally {
+        setLoading(false);
       }
     };
     if (currentUser.isAdmin) {
       fetchComments();
     }
-  }, [currentUser._id, currentPage]);
+  }, [currentUser._id, currentUser.isAdmin, currentPage, searchTerm]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setSearchTerm(searchInput.trim());
+    setCurrentPage(1);
+  };
 
   const handleDeleteComment = async () => {
     setShowModal(false);
@@ -63,118 +78,114 @@ export default function DashComments() {
       setComments((prev) =>
         prev.filter((comment) => comment._id !== commentIdToDelete),
       );
+      setTotalComments((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.log(error.message);
     }
   };
 
+  const from = totalComments === 0 ? 0 : (currentPage - 1) * POSTS_LIMIT + 1;
+  const to = Math.min(currentPage * POSTS_LIMIT, totalComments);
+
   return (
-    <div className="table-auto md:mx-auto p-3 w-full">
-      {currentUser.isAdmin && comments.length > 0 ? (
-        <>
-          <Table hoverable className="shadow-md">
-            <TableHead>
-              <TableRow>
-                <TableHeadCell>Date updated</TableHeadCell>
-                <TableHeadCell>Comment content</TableHeadCell>
-                <TableHeadCell>Number of likes</TableHeadCell>
-                <TableHeadCell>User image</TableHeadCell>
-                <TableHeadCell>Username</TableHeadCell>
-                <TableHeadCell>Post title</TableHeadCell>
-                <TableHeadCell>Delete</TableHeadCell>
-              </TableRow>
-            </TableHead>
-            <TableBody className="divide-y">
-              {comments.map((comment) => (
-                <TableRow
-                  key={comment._id}
-                  className="bg-white dark:border-gray-700 dark:bg-gray-800"
-                >
-                  <TableCell>
-                    {new Date(comment.updatedAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="max-w-xs truncate">
+    <>
+      <DashTable
+        title="Svi komentari"
+        searchId="table-search-comments"
+        searchPlaceholder="Pretraži komentare..."
+        searchValue={searchInput}
+        onSearchChange={(e) => setSearchInput(e.target.value)}
+        onSearchSubmit={handleSearchSubmit}
+        total={totalComments}
+        from={from}
+        to={to}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        loading={loading}
+        isEmpty={comments.length === 0}
+        hasSearch={Boolean(searchTerm)}
+        emptyTitle="Još nema komentara"
+        emptyDescription="Komentari sa objava će se pojaviti ovde."
+      >
+        <Table hoverable className="w-full table-fixed">
+          <TableHead>
+            <TableRow>
+              <TableHeadCell className="h-11 w-36 py-0">Ažurirano</TableHeadCell>
+              <TableHeadCell className="h-11 py-0">Komentar</TableHeadCell>
+              <TableHeadCell className="h-11 w-44 py-0">Autor</TableHeadCell>
+              <TableHeadCell className="h-11 py-0">Objava</TableHeadCell>
+              <TableHeadCell className="h-11 w-24 py-0">Sviđanja</TableHeadCell>
+              <TableHeadCell className="h-11 w-28 py-0">
+                <span className="sr-only">Akcije</span>
+              </TableHeadCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {comments.map((comment) => (
+              <TableRow key={comment._id} className="bg-white dark:bg-gray-800">
+                <TableCell className="h-[72px] py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                  {formatDate(comment.updatedAt)}
+                </TableCell>
+                <TableCell className="h-[72px] max-w-0 py-0">
+                  <p className="line-clamp-2 text-gray-900 dark:text-white">
                     {comment.content}
-                  </TableCell>
-                  <TableCell>{comment.numberOfLikes}</TableCell>
-                  <TableCell>
+                  </p>
+                </TableCell>
+                <TableCell className="h-[72px] py-0">
+                  <div className="flex min-w-0 items-center gap-3">
                     {comment.userId?.profilePicture && (
                       <img
                         src={comment.userId.profilePicture}
                         alt={comment.userId.username}
-                        className="h-10 w-10 rounded-full object-cover bg-gray-500"
+                        className="h-8 w-8 shrink-0 rounded-full object-cover"
                       />
                     )}
-                  </TableCell>
-                  <TableCell>
-                    {comment.userId?.username || "deleted user"}
-                  </TableCell>
-                  <TableCell>
-                    {comment.postId?.slug ? (
-                      <Link
-                        className="font-medium text-gray-900 dark:text-white"
-                        to={`/post/${comment.postId.slug}`}
-                      >
-                        {comment.postId.title}
-                      </Link>
-                    ) : (
-                      "deleted post"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className="cursor-pointer font-medium text-red-500 hover:underline"
-                      onClick={() => {
-                        setShowModal(true);
-                        setCommentIdToDelete(comment._id);
-                      }}
-                    >
-                      Delete
+                    <span className="min-w-0 truncate text-sm font-medium text-gray-900 dark:text-white">
+                      {comment.userId?.username || "obrisan nalog"}
                     </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pagination
-            currentPage={Number(currentPage)}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
-            showIcons
-            className="mt-4"
-          />
-        </>
-      ) : (
-        <div>
-          <h1>No comments found</h1>
-        </div>
-      )}
-      <Modal
+                  </div>
+                </TableCell>
+                <TableCell className="h-[72px] max-w-0 py-0">
+                  {comment.postId?.slug ? (
+                    <Link
+                      className="block truncate font-medium text-blue-600 hover:underline dark:text-blue-500"
+                      to={`/post/${comment.postId.slug}`}
+                    >
+                      {comment.postId.title}
+                    </Link>
+                  ) : (
+                    <span className="text-gray-500 dark:text-gray-400">
+                      obrisana objava
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell className="h-[72px] py-0 text-gray-500 dark:text-gray-400">
+                  {comment.numberOfLikes}
+                </TableCell>
+                <TableCell className="h-[72px] py-0 text-right">
+                  <button
+                    type="button"
+                    className="cursor-pointer font-medium text-red-600 hover:underline dark:text-red-500"
+                    onClick={() => {
+                      setShowModal(true);
+                      setCommentIdToDelete(comment._id);
+                    }}
+                  >
+                    Obriši
+                  </button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </DashTable>
+      <ConfirmModal
         show={showModal}
         onClose={() => setShowModal(false)}
-        popup
-        size="md"
-        dismissible
-      >
-        <ModalHeader />
-        <ModalBody>
-          <div className="text-center">
-            <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete this comment? This cannot be
-              undone.
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button color="failure" onClick={handleDeleteComment}>
-                Yes, I&apos;m sure
-              </Button>
-              <Button color="gray" onClick={() => setShowModal(false)}>
-                No, cancel
-              </Button>
-            </div>
-          </div>
-        </ModalBody>
-      </Modal>
-    </div>
+        onConfirm={handleDeleteComment}
+        message="Da li si siguran da želiš da obrišeš ovaj komentar? Ova radnja se ne može opozvati."
+      />
+    </>
   );
 }

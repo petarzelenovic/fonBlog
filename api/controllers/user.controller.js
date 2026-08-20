@@ -87,8 +87,16 @@ export const getUsers = async (req, res, next) => {
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 10;
     const sortDirection = req.query.sort === "asc" ? 1 : -1;
+    const query = {
+      ...(req.query.searchTerm && {
+        $or: [
+          { username: { $regex: req.query.searchTerm, $options: "i" } },
+          { email: { $regex: req.query.searchTerm, $options: "i" } },
+        ],
+      }),
+    };
 
-    const users = await User.find()
+    const users = await User.find(query)
       .sort({ createdAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
@@ -98,7 +106,7 @@ export const getUsers = async (req, res, next) => {
       return rest;
     });
 
-    const totalUsers = await User.countDocuments();
+    const totalUsers = await User.countDocuments(query);
     const now = new Date();
 
     const oneMonthAgo = new Date(

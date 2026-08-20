@@ -1,13 +1,6 @@
-import React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useState } from "react";
 import {
-  Button,
-  Modal,
-  ModalBody,
-  ModalHeader,
-  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -15,40 +8,57 @@ import {
   TableHeadCell,
   TableRow,
 } from "flowbite-react";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { FaCheck, FaTimes } from "react-icons/fa";
+import { POSTS_LIMIT } from "../constants.js";
+import { formatDate } from "../utils/formatDate.js";
+import ConfirmModal from "./ConfirmModal";
+import DashTable from "./DashTable";
 
 export default function DashUsers() {
   const { currentUser } = useSelector((state) => state.user);
 
   const [users, setUsers] = useState([]);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalUsers, setTotalUsers] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [userIdToDelete, setUserIdToDelete] = useState("");
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const startIndex = (currentPage - 1) * 9;
-        const response = await fetch(
-          `/api/user/getusers?startIndex=${startIndex}&limit=9`,
-        );
+        setLoading(true);
+        const params = new URLSearchParams({
+          startIndex: String((currentPage - 1) * POSTS_LIMIT),
+          limit: String(POSTS_LIMIT),
+        });
+        if (searchTerm) params.set("searchTerm", searchTerm);
+
+        const response = await fetch(`/api/user/getusers?${params.toString()}`);
         const data = await response.json();
         if (response.ok) {
           setUsers(data.users);
           setTotalUsers(data.total);
-          setTotalPages(Math.ceil(data.total / 9) || 1);
+          setTotalPages(Math.ceil(data.total / POSTS_LIMIT) || 1);
         }
       } catch (error) {
         console.log(error.message);
+      } finally {
+        setLoading(false);
       }
     };
     if (currentUser.isAdmin) {
       fetchUsers();
     }
-  }, [currentUser._id, currentPage]);
+  }, [currentUser._id, currentUser.isAdmin, currentPage, searchTerm]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setSearchTerm(searchInput.trim());
+    setCurrentPage(1);
+  };
 
   const handleDeleteUser = async () => {
     setShowModal(false);
@@ -68,99 +78,101 @@ export default function DashUsers() {
     }
   };
 
+  const from = totalUsers === 0 ? 0 : (currentPage - 1) * POSTS_LIMIT + 1;
+  const to = Math.min(currentPage * POSTS_LIMIT, totalUsers);
+
   return (
-    <div className="table-auto md:mx-auto p-3 w-full">
-      {currentUser.isAdmin && users.length > 0 ? (
-        <>
-          <Table hoverable className="shadow-md">
-            <TableHead>
-              <TableRow>
-                <TableHeadCell>Date created</TableHeadCell>
-                <TableHeadCell>User image</TableHeadCell>
-                <TableHeadCell>Username</TableHeadCell>
-                <TableHeadCell>Email</TableHeadCell>
-                <TableHeadCell>Admin</TableHeadCell>
-                <TableHeadCell>Delete</TableHeadCell>
-              </TableRow>
-            </TableHead>
-            <TableBody className="divide-y">
-              {users.map((user) => (
-                <TableRow
-                  key={user._id}
-                  className="bg-white dark:border-gray-700 dark:bg-gray-800"
-                >
-                  <TableCell>
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
+    <>
+      <DashTable
+        title="Svi korisnici"
+        searchId="table-search-users"
+        searchPlaceholder="Pretraži korisnike..."
+        searchValue={searchInput}
+        onSearchChange={(e) => setSearchInput(e.target.value)}
+        onSearchSubmit={handleSearchSubmit}
+        total={totalUsers}
+        from={from}
+        to={to}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        loading={loading}
+        isEmpty={users.length === 0}
+        hasSearch={Boolean(searchTerm)}
+        emptyTitle="Još nema korisnika"
+        emptyDescription="Registrovani korisnici će se pojaviti ovde."
+      >
+        <Table hoverable className="w-full table-fixed">
+          <TableHead>
+            <TableRow>
+              <TableHeadCell className="h-11 w-36 py-0">
+                Registrovan
+              </TableHeadCell>
+              <TableHeadCell className="h-11 py-0">Korisnik</TableHeadCell>
+              <TableHeadCell className="h-11 py-0">Email</TableHeadCell>
+              <TableHeadCell className="h-11 w-32 py-0">Uloga</TableHeadCell>
+              <TableHeadCell className="h-11 w-28 py-0">
+                <span className="sr-only">Akcije</span>
+              </TableHeadCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user._id} className="bg-white dark:bg-gray-800">
+                <TableCell className="h-[72px] py-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                  {formatDate(user.createdAt)}
+                </TableCell>
+                <TableCell className="h-[72px] max-w-0 py-0">
+                  <div className="flex min-w-0 items-center gap-3">
                     <img
                       src={user.profilePicture}
                       alt={user.username}
-                      className="h-10 w-10 rounded-full object-cover bg-gray-500"
+                      className="h-10 w-10 shrink-0 rounded-full object-cover"
                     />
-                  </TableCell>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    {user.isAdmin ? (
-                      <FaCheck className="text-green-500" />
-                    ) : (
-                      <FaTimes className="text-red-500" />
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className="cursor-pointer font-medium text-red-500 hover:underline"
+                    <span className="min-w-0 truncate font-medium text-gray-900 dark:text-white">
+                      {user.username}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="h-[72px] truncate py-0 text-gray-500 dark:text-gray-400">
+                  {user.email}
+                </TableCell>
+                <TableCell className="h-[72px] py-0">
+                  {user.isAdmin ? (
+                    <span className="rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-medium text-gray-900 dark:border-gray-600 dark:text-white">
+                      Admin
+                    </span>
+                  ) : (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Korisnik
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell className="h-[72px] py-0 text-right">
+                  {user._id !== currentUser._id && (
+                    <button
+                      type="button"
+                      className="cursor-pointer font-medium text-red-600 hover:underline dark:text-red-500"
                       onClick={() => {
                         setShowModal(true);
                         setUserIdToDelete(user._id);
                       }}
                     >
-                      Delete
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <Pagination
-            currentPage={Number(currentPage)}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
-            showIcons
-            className="mt-4"
-          />
-        </>
-      ) : (
-        <div>
-          <h1>No users found</h1>
-        </div>
-      )}
-      <Modal
+                      Obriši
+                    </button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </DashTable>
+      <ConfirmModal
         show={showModal}
         onClose={() => setShowModal(false)}
-        popup
-        size="md"
-        dismissible
-      >
-        <ModalHeader />
-        <ModalBody>
-          <div className="text-center">
-            <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Are you sure you want to delete this user? This cannot be undone.
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button color="failure" onClick={handleDeleteUser}>
-                Yes, I&apos;m sure
-              </Button>
-              <Button color="gray" onClick={() => setShowModal(false)}>
-                No, cancel
-              </Button>
-            </div>
-          </div>
-        </ModalBody>
-      </Modal>
-    </div>
+        onConfirm={handleDeleteUser}
+        message="Da li si siguran da želiš da obrišeš ovog korisnika? Ova radnja se ne može opozvati."
+      />
+    </>
   );
 }

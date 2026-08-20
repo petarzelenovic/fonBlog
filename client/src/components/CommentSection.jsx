@@ -1,16 +1,9 @@
-import {
-  Alert,
-  Button,
-  Modal,
-  ModalBody,
-  ModalHeader,
-  Textarea,
-} from "flowbite-react";
+import { Alert, Button, Textarea } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { HiOutlineExclamationCircle } from "react-icons/hi";
 import Comment from "./Comment";
+import ConfirmModal from "./ConfirmModal";
 
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
@@ -201,35 +194,12 @@ export default function CommentSection({ postId }) {
         </div>
       )}
 
-      <Modal
+      <ConfirmModal
         show={showModal}
         onClose={() => setShowModal(false)}
-        popup
-        size="md"
-        dismissible
-      >
-        <ModalHeader />
-        <ModalBody>
-          <div className="text-center">
-            <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
-            <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
-              Da li ste sigurni da želite da obrišete ovaj komentar? Ova radnja
-              se ne može opozvati.
-            </h3>
-            <div className="flex justify-center gap-4">
-              <Button
-                color="failure"
-                onClick={() => handleDelete(commentToDelete)}
-              >
-                Da, obriši
-              </Button>
-              <Button color="gray" onClick={() => setShowModal(false)}>
-                Ne, otkaži
-              </Button>
-            </div>
-          </div>
-        </ModalBody>
-      </Modal>
+        onConfirm={() => handleDelete(commentToDelete)}
+        message="Da li si siguran da želiš da obrišeš ovaj komentar? Ova radnja se ne može opozvati."
+      />
     </section>
   );
 }
