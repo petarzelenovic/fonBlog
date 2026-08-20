@@ -2,12 +2,33 @@ import { errorHandler } from "../utils/error.js";
 import Post from "../models/post.model.js";
 import { validateCategorySlug } from "./category.controller.js";
 
+function isEmptyHtml(html = "") {
+  return (
+    String(html)
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim().length === 0
+  );
+}
+
+function hasRequiredPostFields(body = {}) {
+  return (
+    Boolean(body.title?.trim()) &&
+    Boolean(body.image?.trim()) &&
+    Boolean(body.category?.trim()) &&
+    !isEmptyHtml(body.content)
+  );
+}
+
 export const create = async (req, res, next) => {
   if (!req.user.isAdmin) {
     return next(errorHandler(403, "You are not authorized to create a post"));
   }
-  if (!req.body.title || !req.body.content || !req.body.category) {
-    return next(errorHandler(400, "Please provide all required fields"));
+  if (!hasRequiredPostFields(req.body)) {
+    return next(
+      errorHandler(400, "Naslov, naslovna slika i sadržaj su obavezni"),
+    );
   }
 
   try {
@@ -49,7 +70,9 @@ export const getPosts = async (req, res, next) => {
     const selectedCategories = parseCategoryQuery(req.query.category);
     const query = {
       ...(req.query.userId && { userId: req.query.userId }),
-      ...(selectedCategories.length === 1 && { category: selectedCategories[0] }),
+      ...(selectedCategories.length === 1 && {
+        category: selectedCategories[0],
+      }),
       ...(selectedCategories.length > 1 && {
         category: { $in: selectedCategories },
       }),
@@ -111,6 +134,12 @@ export const updatePost = async (req, res, next) => {
       errorHandler(403, "You are not authorized to update this post"),
     );
   }
+  if (!hasRequiredPostFields(req.body)) {
+    return next(
+      errorHandler(400, "Naslov, naslovna slika i sadržaj su obavezni"),
+    );
+  }
+
   try {
     await validateCategorySlug(req.body.category);
 

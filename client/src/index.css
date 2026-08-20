@@ -76,6 +76,57 @@ body {
   font-size: 1.05rem;
 }
 
+.post-editor .ql-toolbar.ql-snow {
+  border-color: #dce5ea;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.post-editor .ql-container.ql-snow {
+  border-color: #dce5ea;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  min-height: 20rem;
+  font-size: 1.05rem;
+}
+
+.post-editor .ql-editor {
+  min-height: 20rem;
+}
+
+.dark .post-editor .ql-toolbar.ql-snow,
+.dark .post-editor .ql-container.ql-snow {
+  border-color: #2a3f4e;
+  background: #0e1a24;
+}
+
+.dark .post-editor .ql-snow .ql-stroke {
+  stroke: #9aadc0;
+}
+
+.dark .post-editor .ql-snow .ql-fill {
+  fill: #9aadc0;
+}
+
+.dark .post-editor .ql-snow .ql-picker,
+.dark .post-editor .ql-snow .ql-picker-label {
+  color: #9aadc0;
+}
+
+.dark .post-editor .ql-snow .ql-picker-options {
+  background: #0e1a24;
+  border-color: #2a3f4e;
+}
+
+.dark .post-editor .ql-editor {
+  color: #e8eef2;
+}
+
+.dark .post-editor .ql-editor.ql-blank::before {
+  color: #9aadc0;
+}
+
 .post-content {
   max-width: 100%;
   overflow-wrap: anywhere;
