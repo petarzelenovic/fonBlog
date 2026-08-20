@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Label,
@@ -58,6 +58,10 @@ export default function DashCategories() {
   const [saving, setSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+
+  useEffect(() => {
+    refreshCategories();
+  }, [refreshCategories]);
 
   const filtered = useMemo(() => {
     const query = searchTerm.toLowerCase();
@@ -241,7 +245,7 @@ export default function DashCategories() {
                         Izmeni
                       </button>
                       {inUse ? (
-                        <Tooltip content="Ne može da se obriše dok je koriste objave">
+                        <Tooltip content="Kategorija se koristi u postojećim objavama i ne može se obrisati.">
                           <span>
                             <button
                               type="button"
