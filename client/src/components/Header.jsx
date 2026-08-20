@@ -154,12 +154,20 @@ export default function Header() {
               </DropdownItem>
             </Dropdown>
           ) : (
-            <Link
-              to="/sign-in"
-              className="rounded-lg bg-fon-navy px-3.5 py-2 text-sm font-medium text-white hover:bg-fon-navy-hover"
-            >
-              Prijavi se
-            </Link>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Link
+                to="/sign-in"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Prijavi se
+              </Link>
+              <Link
+                to="/sign-up"
+                className="rounded-lg bg-fon-navy px-3 py-2 text-sm font-medium text-white hover:bg-fon-navy-hover"
+              >
+                Registruj se
+              </Link>
+            </div>
           )}
         </div>
       </div>
