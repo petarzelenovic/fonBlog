@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Spinner } from "flowbite-react";
 import PostForm from "../components/PostForm.jsx";
+import { useToast } from "../contexts/ToastContext.jsx";
 
 export default function UpdatePost() {
   const { postId } = useParams();
   const navigate = useNavigate();
+  const { showError } = useToast();
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
-  const [publishError, setPublishError] = useState(null);
   const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
@@ -37,7 +38,6 @@ export default function UpdatePost() {
   const handleSubmit = async (updatedData) => {
     try {
       setPublishing(true);
-      setPublishError(null);
       const response = await fetch(
         `/api/posts/${updatedData._id}`,
         {
@@ -50,12 +50,12 @@ export default function UpdatePost() {
       );
       const data = await response.json();
       if (!response.ok) {
-        setPublishError(data.message);
+        showError(data.message);
         return;
       }
       navigate(`/post/${data.slug}`);
     } catch (error) {
-      setPublishError(error.message);
+      showError(error.message);
     } finally {
       setPublishing(false);
     }
@@ -94,7 +94,6 @@ export default function UpdatePost() {
       subtitle="Ažuriraj sadržaj i objavi izmene"
       submitLabel="Sačuvaj izmene"
       initialData={formData}
-      submitError={publishError}
       submitting={publishing}
       onSubmit={handleSubmit}
     />

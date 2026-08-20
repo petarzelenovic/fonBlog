@@ -4,11 +4,13 @@ import { app } from "../firebase";
 import { signInSuccess } from "../redux/user/userSlice.js";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../contexts/ToastContext.jsx";
 
 export default function OAuth({ label = "Nastavi sa Google nalogom" }) {
   const auth = getAuth(app);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { showError } = useToast();
 
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
@@ -33,9 +35,17 @@ export default function OAuth({ label = "Nastavi sa Google nalogom" }) {
       if (res.ok) {
         dispatch(signInSuccess(data));
         navigate("/");
+      } else {
+        showError(data.message || "Prijava preko Google-a nije uspela");
       }
     } catch (error) {
-      console.log(error);
+      if (
+        error.code === "auth/popup-closed-by-user" ||
+        error.code === "auth/cancelled-popup-request"
+      ) {
+        return;
+      }
+      showError(error.message);
     }
   };
 

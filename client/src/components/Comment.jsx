@@ -5,6 +5,7 @@ import { HiDotsHorizontal } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/formatDate.js";
+import { useToast } from "../contexts/ToastContext.jsx";
 
 export default function Comment({
   comment,
@@ -16,11 +17,11 @@ export default function Comment({
 }) {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const { showError } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
   const [replyContent, setReplyContent] = useState("");
-  const [replyError, setReplyError] = useState(null);
   const [replying, setReplying] = useState(false);
   const username = comment.userId?.username || "obrisan korisnik";
   const profilePicture = comment.userId?.profilePicture;
@@ -57,7 +58,6 @@ export default function Comment({
     }
     setIsEditing(false);
     setIsReplying((open) => !open);
-    setReplyError(null);
   };
 
   const handleReplySubmit = async (e) => {
@@ -66,12 +66,11 @@ export default function Comment({
 
     try {
       setReplying(true);
-      setReplyError(null);
       await onReply(comment._id, replyContent.trim());
       setReplyContent("");
       setIsReplying(false);
     } catch (error) {
-      setReplyError(error.message);
+      showError(error.message);
     } finally {
       setReplying(false);
     }
@@ -208,7 +207,6 @@ export default function Comment({
                 onClick={() => {
                   setIsReplying(false);
                   setReplyContent("");
-                  setReplyError(null);
                 }}
               >
                 Otkaži
@@ -223,11 +221,6 @@ export default function Comment({
               </Button>
             </div>
           </div>
-          {replyError && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-500">
-              {replyError}
-            </p>
-          )}
         </form>
       )}
 

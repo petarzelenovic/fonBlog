@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PostForm from "../components/PostForm.jsx";
+import { useToast } from "../contexts/ToastContext.jsx";
 
 export default function CreatePost() {
   const navigate = useNavigate();
-  const [publishError, setPublishError] = useState(null);
+  const { showError } = useToast();
   const [publishing, setPublishing] = useState(false);
 
   const handleSubmit = async (formData) => {
     try {
       setPublishing(true);
-      setPublishError(null);
       const response = await fetch("/api/posts", {
         method: "POST",
         body: JSON.stringify(formData),
@@ -20,12 +20,12 @@ export default function CreatePost() {
       });
       const data = await response.json();
       if (!response.ok) {
-        setPublishError(data.message);
+        showError(data.message);
         return;
       }
       navigate(`/post/${data.slug}`);
     } catch (error) {
-      setPublishError(error.message);
+      showError(error.message);
     } finally {
       setPublishing(false);
     }
@@ -36,7 +36,6 @@ export default function CreatePost() {
       title="Nova objava"
       subtitle="Napiši vest ili priču za Fon Blog"
       submitLabel="Objavi"
-      submitError={publishError}
       submitting={publishing}
       onSubmit={handleSubmit}
     />

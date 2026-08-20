@@ -1,4 +1,4 @@
-import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
+import { Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import { CircularProgressbar } from "react-circular-progressbar";
@@ -16,21 +16,20 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { USERNAME_PATTERN } from "../constants";
 import { uploadImage } from "../utils/uploadImage";
+import { useToast } from "../contexts/ToastContext";
 import ConfirmModal from "./ConfirmModal";
 
 export default function DashProfile() {
-  const { currentUser, error, loading } = useSelector((state) => state.user);
+  const { currentUser, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { showError, showSuccess } = useToast();
   const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const filePickerRef = useRef(null);
   const [imageFileUploadProgress, setImageFileUploadProgress] = useState(null);
-  const [imageFileUploadError, setImageFileUploadError] = useState(null);
   const [formData, setFormData] = useState({});
   const [imageFileUploading, setImageFileUploading] = useState(false);
-  const [updateUserSuccess, setUpdateUserSuccess] = useState("");
-  const [updateUserError, setUpdateUserError] = useState("");
   const [showModal, setShowModal] = useState(false);
 
   const handleImageChange = (e) => {
@@ -53,14 +52,12 @@ export default function DashProfile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setUpdateUserSuccess("");
-    setUpdateUserError("");
     if (Object.keys(formData).length === 0) {
-      setUpdateUserError("Nema izmena za čuvanje");
+      showError("Nema izmena za čuvanje");
       return;
     }
     if (formData.username && !USERNAME_PATTERN.test(formData.username)) {
-      setUpdateUserError(
+      showError(
         "Korisničko ime može sadržati samo slova, brojeve, tačku i donju crtu",
       );
       return;
@@ -78,27 +75,26 @@ export default function DashProfile() {
 
       if (!res.ok) {
         dispatch(updateFailure(data.message));
-        setUpdateUserError(data.message);
+        showError(data.message);
         return;
       }
       dispatch(updateSuccess(data));
-      setUpdateUserSuccess("Profil je uspešno ažuriran");
+      showSuccess("Profil je uspešno ažuriran");
     } catch (err) {
       dispatch(updateFailure(err.message));
-      setUpdateUserError(err.message);
+      showError(err.message);
     }
   };
 
   const uploadProfileImage = async () => {
     setImageFileUploading(true);
-    setImageFileUploadError(null);
     setImageFileUploadProgress(null);
     try {
       const url = await uploadImage(imageFile, setImageFileUploadProgress);
       setImageFileUrl(url);
       setFormData((prev) => ({ ...prev, profilePicture: url }));
     } catch {
-      setImageFileUploadError("Otpremanje slike nije uspelo");
+      showError("Otpremanje slike nije uspelo");
       setImageFile(null);
       setImageFileUrl(null);
     } finally {
@@ -118,12 +114,14 @@ export default function DashProfile() {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         dispatch(deleteUserFailure(data.message));
+        showError(data.message || "Brisanje naloga nije uspelo");
         return;
       }
       dispatch(deleteUserSuccess());
       navigate("/sign-in");
     } catch (err) {
       dispatch(deleteUserFailure(err.message));
+      showError(err.message);
       setShowModal(false);
     }
   };
@@ -192,9 +190,6 @@ export default function DashProfile() {
             Klikni na sliku da je promeniš
           </p>
         </div>
-        {imageFileUploadError && (
-          <Alert color="failure">{imageFileUploadError}</Alert>
-        )}
         <div>
           <Label htmlFor="username">Korisničko ime</Label>
           <TextInput
@@ -240,11 +235,6 @@ export default function DashProfile() {
             "Sačuvaj izmene"
           )}
         </Button>
-        {updateUserSuccess && (
-          <Alert color="success">{updateUserSuccess}</Alert>
-        )}
-        {updateUserError && <Alert color="failure">{updateUserError}</Alert>}
-        {error && <Alert color="failure">{error}</Alert>}
       </form>
       <div className="mt-8 flex justify-between border-t border-fon-border pt-5 text-sm dark:border-fon-dark-border">
         <button

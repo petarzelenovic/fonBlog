@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  Alert,
   Button,
   Label,
   Modal,
@@ -17,6 +16,7 @@ import {
 } from "flowbite-react";
 import { DEFAULT_CATEGORY_COLOR, POSTS_LIMIT } from "../constants.js";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
+import { useToast } from "../contexts/ToastContext.jsx";
 import ConfirmModal from "./ConfirmModal";
 import DashTable from "./DashTable";
 
@@ -47,6 +47,7 @@ const emptyForm = {
 
 export default function DashCategories() {
   const { categories, loading, refreshCategories } = useCategories();
+  const { showError } = useToast();
 
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,11 +55,9 @@ export default function DashCategories() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
-  const [formError, setFormError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
-  const [deleteError, setDeleteError] = useState(null);
 
   const filtered = useMemo(() => {
     const query = searchTerm.toLowerCase();
@@ -84,7 +83,6 @@ export default function DashCategories() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
-    setFormError(null);
     setShowForm(true);
   };
 
@@ -94,14 +92,12 @@ export default function DashCategories() {
       name: category.name,
       color: category.color || DEFAULT_CATEGORY_COLOR,
     });
-    setFormError(null);
     setShowForm(true);
   };
 
   const closeForm = () => {
     setShowForm(false);
     setEditing(null);
-    setFormError(null);
   };
 
   const handleNameChange = (event) => {
@@ -110,12 +106,11 @@ export default function DashCategories() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setFormError(null);
 
     const name = form.name.trim();
     const color = form.color.trim();
     if (!name || !slug || !color) {
-      setFormError("Ime, identifikator i boja su obavezni");
+      showError("Ime, identifikator i boja su obavezni");
       return;
     }
 
@@ -131,13 +126,13 @@ export default function DashCategories() {
       );
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setFormError(categoryErrorMessage(data.message));
+        showError(categoryErrorMessage(data.message));
         return;
       }
       await refreshCategories();
       closeForm();
     } catch (error) {
-      setFormError(error.message);
+      showError(error.message);
     } finally {
       setSaving(false);
     }
@@ -146,19 +141,18 @@ export default function DashCategories() {
   const handleDelete = async () => {
     if (!categoryToDelete) return;
     setShowDeleteModal(false);
-    setDeleteError(null);
     try {
       const response = await fetch(`/api/categories/${categoryToDelete._id}`, {
         method: "DELETE",
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        setDeleteError(categoryErrorMessage(data.message));
+        showError(categoryErrorMessage(data.message));
         return;
       }
       await refreshCategories();
     } catch (error) {
-      setDeleteError(error.message);
+      showError(error.message);
     } finally {
       setCategoryToDelete(null);
     }
@@ -166,15 +160,6 @@ export default function DashCategories() {
 
   return (
     <>
-      {deleteError && (
-        <Alert
-          color="failure"
-          className="mb-4"
-          onDismiss={() => setDeleteError(null)}
-        >
-          {deleteError}
-        </Alert>
-      )}
       <DashTable
         title="Sve kategorije"
         searchId="table-search-categories"
@@ -337,7 +322,6 @@ export default function DashCategories() {
                 </span>
               </div>
             </div>
-            {formError && <Alert color="failure">{formError}</Alert>}
             <div className="flex justify-end gap-3 pt-2">
               <Button
                 type="button"

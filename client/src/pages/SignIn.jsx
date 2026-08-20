@@ -1,4 +1,4 @@
-import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
+import { Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -9,11 +9,13 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import OAuth from "../components/OAuth";
 import AuthLayout from "../components/AuthLayout";
+import { useToast } from "../contexts/ToastContext";
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
-  const { loading, error: errorMessage } = useSelector((state) => state.user);
+  const { loading } = useSelector((state) => state.user);
+  const { showError } = useToast();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,7 +28,8 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
-      return dispatch(signInFailure("Popuni sva polja"));
+      showError("Popuni sva polja");
+      return;
     }
 
     try {
@@ -43,9 +46,11 @@ export default function SignIn() {
         dispatch(signInSuccess(data));
         navigate("/");
       } else {
+        showError(data.message);
         dispatch(signInFailure(data.message));
       }
     } catch (error) {
+      showError(error.message);
       dispatch(signInFailure(error.message));
     }
   };
@@ -95,9 +100,6 @@ export default function SignIn() {
             "Prijavi se"
           )}
         </Button>
-        {errorMessage && (
-          <Alert color="failure">{errorMessage}</Alert>
-        )}
       </form>
 
       <p className="text-sm text-gray-500 dark:text-gray-400">

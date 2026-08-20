@@ -1,5 +1,4 @@
 import {
-  Alert,
   Button,
   Label,
   Spinner,
@@ -14,6 +13,7 @@ import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { HiOutlinePhotograph } from "react-icons/hi";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
+import { useToast } from "../contexts/ToastContext.jsx";
 import { SHORT_DESCRIPTION_LIMIT } from "../constants";
 import { uploadImage } from "../utils/uploadImage";
 
@@ -42,20 +42,18 @@ export default function PostForm({
   subtitle,
   submitLabel,
   initialData,
-  submitError,
   submitting = false,
   onSubmit,
 }) {
   const { categories, defaultCategorySlug } = useCategories();
+  const { showError } = useToast();
   const filePickerRef = useRef(null);
   const editorFileInputRef = useRef(null);
   const quillRef = useRef(null);
   const editorSelectionRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [imageUploadProgress, setImageUploadProgress] = useState(null);
-  const [imageUploadError, setImageUploadError] = useState(null);
   const [contentUploadProgress, setContentUploadProgress] = useState(null);
-  const [formError, setFormError] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -103,7 +101,6 @@ export default function PostForm({
       return;
     }
 
-    setFormError(null);
     setContentUploadProgress(0);
     try {
       const url = await uploadImage(file, setContentUploadProgress);
@@ -113,7 +110,7 @@ export default function PostForm({
         content: html || `${prev.content || ""}<p><img src="${url}"></p>`,
       }));
     } catch (error) {
-      setFormError(error.message || "Otpremanje slike u sadržaj nije uspelo");
+      showError(error.message || "Otpremanje slike u sadržaj nije uspelo");
     } finally {
       setContentUploadProgress(null);
     }
@@ -141,17 +138,15 @@ export default function PostForm({
       : "rounded-full px-3.5 py-1.5 text-sm text-fon-muted hover:text-fon-navy dark:text-fon-dark-muted dark:hover:text-white";
 
   const uploadCoverImage = async (selectedFile) => {
-    setImageUploadError(null);
     setImageUploadProgress(0);
     try {
       const downloadURL = await uploadImage(
         selectedFile,
         setImageUploadProgress,
       );
-      setImageUploadError(null);
       setFormData((prev) => ({ ...prev, image: downloadURL }));
     } catch (error) {
-      setImageUploadError(error.message || "Otpremanje slike nije uspelo");
+      showError(error.message || "Otpremanje slike nije uspelo");
     } finally {
       setImageUploadProgress(null);
     }
@@ -176,18 +171,17 @@ export default function PostForm({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setFormError(null);
 
     if (!formData.title?.trim()) {
-      setFormError("Unesi naslov objave");
+      showError("Unesi naslov objave");
       return;
     }
     if (!formData.image) {
-      setFormError("Dodaj naslovnu sliku");
+      showError("Dodaj naslovnu sliku");
       return;
     }
     if (isEmptyHtml(formData.content)) {
-      setFormError("Unesi sadržaj objave");
+      showError("Unesi sadržaj objave");
       return;
     }
 
@@ -198,8 +192,6 @@ export default function PostForm({
       category: formData.category || defaultCategorySlug,
     });
   };
-
-  const errorMessage = formError || submitError;
 
   return (
     <main className="bg-white dark:bg-fon-dark">
@@ -331,11 +323,6 @@ export default function PostForm({
                 </span>
               )}
             </button>
-            {imageUploadError && (
-              <Alert color="failure" className="mt-3">
-                {imageUploadError}
-              </Alert>
-            )}
           </div>
 
           <div>
@@ -387,8 +374,6 @@ export default function PostForm({
               )}
             </Button>
           </div>
-
-          {errorMessage && <Alert color="failure">{errorMessage}</Alert>}
         </form>
       </div>
     </main>

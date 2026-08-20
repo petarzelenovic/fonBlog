@@ -1,9 +1,10 @@
-import { Alert, Button, Textarea } from "flowbite-react";
+import { Button, Textarea } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Comment from "./Comment";
 import ConfirmModal from "./ConfirmModal";
+import { useToast } from "../contexts/ToastContext";
 
 function getParentId(comment) {
   return comment?.parentId ? String(comment.parentId) : null;
@@ -52,7 +53,7 @@ function withCurrentUser(comment, currentUser) {
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const [commentError, setCommentError] = useState(null);
+  const { showError } = useToast();
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -78,13 +79,12 @@ export default function CommentSection({ postId }) {
       const data = await response.json();
       if (response.ok) {
         setComment("");
-        setCommentError(null);
         setComments((prev) => [withCurrentUser(data, currentUser), ...prev]);
       } else {
-        setCommentError(data.message);
+        showError(data.message);
       }
     } catch (error) {
-      setCommentError(error.message);
+      showError(error.message);
     }
   };
 
@@ -173,14 +173,14 @@ export default function CommentSection({ postId }) {
         if (response.ok) {
           setComments(data);
         } else {
-          setCommentError(data.message);
+          showError(data.message);
         }
       } catch (error) {
-        setCommentError(error.message);
+        showError(error.message);
       }
     };
     fetchComments();
-  }, [postId]);
+  }, [postId, showError]);
 
   return (
     <section className="mt-12 border-t border-fon-border pt-10 antialiased dark:border-fon-dark-border">
@@ -218,11 +218,6 @@ export default function CommentSection({ postId }) {
               Objavi komentar
             </Button>
           </div>
-          {commentError && (
-            <Alert color="failure" className="mt-5">
-              {commentError}
-            </Alert>
-          )}
         </form>
       ) : (
         <div className="mb-8 rounded-lg border border-fon-border bg-fon-bg p-4 text-sm text-fon-muted dark:border-fon-dark-border dark:bg-fon-dark dark:text-fon-dark-muted">

@@ -1,14 +1,15 @@
-import { Alert, Button, Label, Spinner, TextInput } from "flowbite-react";
+import { Button, Label, Spinner, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import OAuth from "../components/OAuth";
 import AuthLayout from "../components/AuthLayout";
 import { USERNAME_PATTERN } from "../constants";
+import { useToast } from "../contexts/ToastContext";
 
 export default function SignUp() {
   const [formData, setFormData] = useState({});
-  const [errorMessage, setErrorMessage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { showError } = useToast();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,17 +22,18 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.username || !formData.email || !formData.password) {
-      return setErrorMessage("Popuni sva polja");
+      showError("Popuni sva polja");
+      return;
     }
     if (!USERNAME_PATTERN.test(formData.username)) {
-      return setErrorMessage(
+      showError(
         "Korisničko ime može sadržati samo slova, brojeve, tačku i donju crtu",
       );
+      return;
     }
 
     try {
       setLoading(true);
-      setErrorMessage(null);
       const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
@@ -43,10 +45,10 @@ export default function SignUp() {
       if (res.ok) {
         navigate("/sign-in");
       } else {
-        setErrorMessage(data.message);
+        showError(data.message);
       }
     } catch (error) {
-      setErrorMessage(error.message);
+      showError(error.message);
     } finally {
       setLoading(false);
     }
@@ -110,11 +112,6 @@ export default function SignUp() {
             "Kreiraj nalog"
           )}
         </Button>
-        {errorMessage && (
-          <Alert color="failure" onDismiss={() => setErrorMessage(null)}>
-            {errorMessage}
-          </Alert>
-        )}
       </form>
 
       <p className="text-sm text-gray-500 dark:text-gray-400">
