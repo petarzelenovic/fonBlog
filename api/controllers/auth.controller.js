@@ -31,8 +31,12 @@ export const signup = async (req, res, next) => {
   });
   try {
     await user.save();
-    res.status(201).json({ message: "User created successfully" });
+    const { password: pass, ...rest } = user._doc;
+    res.status(201).location(`/api/users/${user._id}`).json(rest);
   } catch (error) {
+    if (error.code === 11000) {
+      return next(errorHandler(409, "Username or email already exists"));
+    }
     next(error);
   }
 };
@@ -47,11 +51,11 @@ export const signin = async (req, res, next) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return next(errorHandler(404, "User not found"));
+      return next(errorHandler(401, "Pogrešni kredencijali"));
     }
     const isPasswordCorrect = bcryptjs.compareSync(password, user.password);
     if (!isPasswordCorrect) {
-      return next(errorHandler(400, "Pogrešni kredencijali"));
+      return next(errorHandler(401, "Pogrešni kredencijali"));
     }
     const token = jwt.sign(
       { id: user._id, isAdmin: user.isAdmin },
@@ -105,9 +109,19 @@ export const googleAuth = async (req, res, next) => {
       const { password: pass, ...rest } = newUser._doc;
       res
         .cookie("access_token", token, { httpOnly: true })
-        .status(200)
+        .status(201)
+        .location(`/api/users/${newUser._id}`)
         .json(rest);
     }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const signOut = async (req, res, next) => {
+  try {
+    res.clearCookie("access_token");
+    res.status(204).end();
   } catch (error) {
     next(error);
   }

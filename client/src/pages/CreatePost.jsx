@@ -11,7 +11,7 @@ export default function CreatePost() {
     try {
       setPublishing(true);
       setPublishError(null);
-      const response = await fetch("/api/post/create", {
+      const response = await fetch("/api/posts", {
         method: "POST",
         body: JSON.stringify(formData),
         headers: {

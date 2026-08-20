@@ -9,7 +9,7 @@ export function CategoriesProvider({ children }) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("/api/category/getcategories");
+        const response = await fetch("/api/categories");
         const data = await response.json();
         if (response.ok) {
           setCategories(data);

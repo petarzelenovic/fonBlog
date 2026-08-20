@@ -50,12 +50,12 @@ export default function DashPosts() {
           params.set("category", selectedCategories.join(","));
         }
 
-        const response = await fetch(`/api/post/getposts?${params.toString()}`);
+        const response = await fetch(`/api/posts?${params.toString()}`);
         const data = await response.json();
         if (response.ok) {
           setUserPosts(data.posts);
-          setTotalPosts(data.totalPosts);
-          setTotalPages(Math.ceil(data.totalPosts / POSTS_LIMIT) || 1);
+          setTotalPosts(data.total);
+          setTotalPages(Math.ceil(data.total / POSTS_LIMIT) || 1);
         }
       } catch (error) {
         console.log(error.message);
@@ -112,12 +112,11 @@ export default function DashPosts() {
   const handleDeletePost = async () => {
     setShowModal(false);
     try {
-      const res = await fetch(
-        `/api/post/deletepost/${postIdToDelete}/${currentUser._id}`,
-        { method: "DELETE" },
-      );
-      const data = await res.json();
+      const res = await fetch(`/api/posts/${postIdToDelete}`, {
+        method: "DELETE",
+      });
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         console.log(data.message);
         return;
       }

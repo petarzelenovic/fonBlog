@@ -20,7 +20,7 @@ export default function Home() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/post/getposts?limit=${POSTS_LIMIT}`);
+        const response = await fetch(`/api/posts?limit=${POSTS_LIMIT}`);
         const data = await response.json();
         if (!response.ok) {
           setError(data.message || "Objave nisu učitane");
@@ -29,7 +29,7 @@ export default function Home() {
         }
 
         setPosts(data.posts);
-        setTotalPosts(data.totalPosts);
+        setTotalPosts(data.total);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -48,7 +48,7 @@ export default function Home() {
       setLoadingMore(true);
       const startIndex = posts.length;
       const response = await fetch(
-        `/api/post/getposts?limit=${POSTS_LIMIT}&startIndex=${startIndex}`,
+        `/api/posts?limit=${POSTS_LIMIT}&startIndex=${startIndex}`,
       );
       const data = await response.json();
       if (!response.ok) {
@@ -56,7 +56,7 @@ export default function Home() {
       }
 
       setPosts((previousPosts) => [...previousPosts, ...data.posts]);
-      setTotalPosts(data.totalPosts);
+      setTotalPosts(data.total);
     } catch (err) {
       console.log(err.message);
     } finally {

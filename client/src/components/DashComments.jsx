@@ -38,13 +38,13 @@ export default function DashComments() {
         if (searchTerm) params.set("searchTerm", searchTerm);
 
         const response = await fetch(
-          `/api/comment/getcomments?${params.toString()}`,
+          `/api/comments?${params.toString()}`,
         );
         const data = await response.json();
         if (response.ok) {
           setComments(data.comments);
-          setTotalComments(data.totalComments);
-          setTotalPages(Math.ceil(data.totalComments / POSTS_LIMIT) || 1);
+          setTotalComments(data.total);
+          setTotalPages(Math.ceil(data.total / POSTS_LIMIT) || 1);
         }
       } catch (error) {
         console.log(error.message);
@@ -66,16 +66,19 @@ export default function DashComments() {
   const handleDeleteComment = async () => {
     setShowModal(false);
     try {
-      const res = await fetch(
-        `/api/comment/deleteComment/${commentIdToDelete}`,
-        { method: "DELETE" },
-      );
-      const data = await res.json();
+      const res = await fetch(`/api/comments/${commentIdToDelete}`, {
+        method: "DELETE",
+      });
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         console.log(data.message);
         return;
       }
-      const deletedCount = data.deletedCount || 1;
+      const removedCount = comments.filter(
+        (comment) =>
+          comment._id === commentIdToDelete ||
+          String(comment.parentId || "") === String(commentIdToDelete),
+      ).length;
       setComments((prev) =>
         prev.filter(
           (comment) =>
@@ -83,7 +86,7 @@ export default function DashComments() {
             String(comment.parentId || "") !== String(commentIdToDelete),
         ),
       );
-      setTotalComments((prev) => Math.max(0, prev - deletedCount));
+      setTotalComments((prev) => Math.max(0, prev - Math.max(removedCount, 1)));
     } catch (error) {
       console.log(error.message);
     }

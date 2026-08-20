@@ -1,7 +1,5 @@
 import express from "express";
 import {
-  createComment,
-  getPostComments,
   likeComment,
   editComment,
   deleteComment,
@@ -10,11 +8,10 @@ import {
 import { verifyUser } from "../utils/verifyUser.js";
 
 const router = express.Router();
-router.post("/create", verifyUser, createComment);
-router.get("/getPostComments/:postId", getPostComments);
-router.put("/likeComment/:commentId", verifyUser, likeComment);
-router.put("/editComment/:commentId", verifyUser, editComment);
-router.delete("/deleteComment/:commentId", verifyUser, deleteComment);
-router.get("/getcomments", verifyUser, getComments);
+
+router.get("/", verifyUser, getComments);
+router.post("/:commentId/likes", verifyUser, likeComment);
+router.patch("/:commentId", verifyUser, editComment);
+router.delete("/:commentId", verifyUser, deleteComment);
 
 export default router;

@@ -27,10 +27,13 @@ export const createCategory = async (req, res, next) => {
       slug: slug.trim(),
       color: color.trim(),
     });
-    res.status(201).json(category);
+    res
+      .status(201)
+      .location(`/api/categories/${category._id}`)
+      .json(category);
   } catch (error) {
     if (error.code === 11000) {
-      return next(errorHandler(400, "Category slug already exists"));
+      return next(errorHandler(409, "Category slug already exists"));
     }
     next(error);
   }
@@ -64,7 +67,7 @@ export const updateCategory = async (req, res, next) => {
     res.status(200).json(category);
   } catch (error) {
     if (error.code === 11000) {
-      return next(errorHandler(400, "Category slug already exists"));
+      return next(errorHandler(409, "Category slug already exists"));
     }
     next(error);
   }
@@ -85,14 +88,14 @@ export const deleteCategory = async (req, res, next) => {
     if (postsCount > 0) {
       return next(
         errorHandler(
-          400,
+          409,
           "Cannot delete a category that is used by existing posts",
         ),
       );
     }
 
     await Category.findByIdAndDelete(req.params.categoryId);
-    res.status(200).json({ message: "Category deleted successfully" });
+    res.status(204).end();
   } catch (error) {
     next(error);
   }
@@ -105,7 +108,7 @@ export async function validateCategorySlug(slug) {
 
   const category = await Category.findOne({ slug });
   if (!category) {
-    throw errorHandler(400, "Invalid category");
+    throw errorHandler(404, "Invalid category");
   }
 
   return category;

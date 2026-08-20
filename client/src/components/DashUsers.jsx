@@ -36,7 +36,7 @@ export default function DashUsers() {
         });
         if (searchTerm) params.set("searchTerm", searchTerm);
 
-        const response = await fetch(`/api/user/getusers?${params.toString()}`);
+        const response = await fetch(`/api/users?${params.toString()}`);
         const data = await response.json();
         if (response.ok) {
           setUsers(data.users);
@@ -63,11 +63,11 @@ export default function DashUsers() {
   const handleDeleteUser = async () => {
     setShowModal(false);
     try {
-      const res = await fetch(`/api/user/delete/${userIdToDelete}`, {
+      const res = await fetch(`/api/users/${userIdToDelete}`, {
         method: "DELETE",
       });
-      const data = await res.json();
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         console.log(data.message);
         return;
       }

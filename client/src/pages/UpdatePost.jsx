@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Spinner } from "flowbite-react";
-import { useSelector } from "react-redux";
 import PostForm from "../components/PostForm.jsx";
 
 export default function UpdatePost() {
   const { postId } = useParams();
   const navigate = useNavigate();
-  const { currentUser } = useSelector((state) => state.user);
   const [formData, setFormData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -18,15 +16,15 @@ export default function UpdatePost() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/post/getposts?postId=${postId}`);
+        const response = await fetch(`/api/posts/${postId}`);
         const data = await response.json();
         if (!response.ok) {
           setLoadError(data.message || "Objava nije pronađena");
           setFormData(null);
           return;
         }
-        setFormData(data.posts[0] || null);
-        setLoadError(data.posts[0] ? null : "Objava nije pronađena");
+        setFormData(data);
+        setLoadError(null);
       } catch (error) {
         setLoadError(error.message);
       } finally {
@@ -41,9 +39,9 @@ export default function UpdatePost() {
       setPublishing(true);
       setPublishError(null);
       const response = await fetch(
-        `/api/post/updatepost/${updatedData._id}/${currentUser._id}`,
+        `/api/posts/${updatedData._id}`,
         {
-          method: "PUT",
+          method: "PATCH",
           body: JSON.stringify(updatedData),
           headers: {
             "Content-Type": "application/json",

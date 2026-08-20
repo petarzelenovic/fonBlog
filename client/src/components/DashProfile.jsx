@@ -73,8 +73,8 @@ export default function DashProfile() {
     }
     try {
       dispatch(updateStart());
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: "PUT",
+      const res = await fetch(`/api/users/${currentUser._id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -133,11 +133,11 @@ export default function DashProfile() {
     try {
       dispatch(deleteUserStart());
 
-      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+      const res = await fetch(`/api/users/${currentUser._id}`, {
         method: "DELETE",
       });
-      const data = await res.json();
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         dispatch(deleteUserFailure(data.message));
         return;
       }
@@ -151,11 +151,11 @@ export default function DashProfile() {
 
   const handleSignOut = async () => {
     try {
-      const res = await fetch("/api/user/signout", {
+      const res = await fetch("/api/auth/signout", {
         method: "POST",
       });
-      const data = await res.json();
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         console.log(data.message);
         return;
       }

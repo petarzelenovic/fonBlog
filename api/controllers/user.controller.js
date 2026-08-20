@@ -48,9 +48,16 @@ export const updateUser = async (req, res, next) => {
       { new: true },
     );
 
+    if (!updatedUser) {
+      return next(errorHandler(404, "User not found"));
+    }
+
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json({ ...rest });
   } catch (error) {
+    if (error.code === 11000) {
+      return next(errorHandler(409, "Username or email already exists"));
+    }
     next(error);
   }
 };
@@ -60,20 +67,14 @@ export const deleteUser = async (req, res, next) => {
     return next(errorHandler(403, "You are not allowed to delete this user"));
   }
   try {
-    await User.findByIdAndDelete(req.params.userId);
+    const deletedUser = await User.findByIdAndDelete(req.params.userId);
+    if (!deletedUser) {
+      return next(errorHandler(404, "User not found"));
+    }
     if (req.user.id === req.params.userId) {
       res.clearCookie("access_token");
     }
-    res.status(200).json("User deleted successfully");
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const signOut = async (req, res, next) => {
-  try {
-    res.clearCookie("access_token");
-    res.status(200).json("User has been signed out");
+    res.status(204).end();
   } catch (error) {
     next(error);
   }
@@ -107,20 +108,9 @@ export const getUsers = async (req, res, next) => {
     });
 
     const totalUsers = await User.countDocuments(query);
-    const now = new Date();
-
-    const oneMonthAgo = new Date(
-      now.getFullYear(),
-      now.getMonth() - 1,
-      now.getDate(),
-    );
-    const lastMonthUsers = await User.countDocuments({
-      createdAt: { $gte: oneMonthAgo },
-    });
     res.status(200).json({
       users: usersWithoutPassword,
       total: totalUsers,
-      lastMonthUsers: lastMonthUsers,
     });
   } catch (error) {
     next(error);

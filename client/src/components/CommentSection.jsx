@@ -66,15 +66,13 @@ export default function CommentSection({ postId }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/api/comment/create`, {
+      const response = await fetch(`/api/posts/${postId}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           content: comment,
-          postId,
-          userId: currentUser._id,
         }),
       });
       const data = await response.json();
@@ -91,15 +89,13 @@ export default function CommentSection({ postId }) {
   };
 
   const handleReply = async (parentId, content) => {
-    const response = await fetch(`/api/comment/create`, {
+    const response = await fetch(`/api/posts/${postId}/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         content,
-        postId,
-        userId: currentUser._id,
         parentId,
       }),
     });
@@ -125,7 +121,7 @@ export default function CommentSection({ postId }) {
         navigate("/sign-in");
         return;
       }
-      const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
+      const res = await fetch(`/api/comments/${commentId}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -147,8 +143,8 @@ export default function CommentSection({ postId }) {
         navigate("/sign-in");
         return;
       }
-      const res = await fetch(`/api/comment/likeComment/${commentId}`, {
-        method: "PUT",
+      const res = await fetch(`/api/comments/${commentId}/likes`, {
+        method: "POST",
       });
       const data = await res.json();
       if (res.ok) {
@@ -172,7 +168,7 @@ export default function CommentSection({ postId }) {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const response = await fetch(`/api/comment/getPostComments/${postId}`);
+        const response = await fetch(`/api/posts/${postId}/comments`);
         const data = await response.json();
         if (response.ok) {
           setComments(data);

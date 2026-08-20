@@ -5,15 +5,10 @@ import { errorHandler } from "../utils/error.js";
 
 export const createComment = async (req, res, next) => {
   try {
-    const { content, postId, userId, parentId } = req.body;
-    if (userId !== req.user.id) {
-      return next(
-        errorHandler(
-          403,
-          "You are not allowed to create a comment for this post",
-        ),
-      );
-    }
+    const { content, parentId } = req.body;
+    const postId = req.params.postId;
+    const userId = req.user.id;
+
     if (!content || content.trim().length === 0) {
       return next(errorHandler(400, "Comment cannot be empty"));
     }
@@ -22,8 +17,10 @@ export const createComment = async (req, res, next) => {
         errorHandler(400, "Comment cannot be more than 200 characters"),
       );
     }
-    if (!postId) {
-      return next(errorHandler(400, "Post is required"));
+
+    const post = await Post.findById(postId);
+    if (!post) {
+      return next(errorHandler(404, "Post not found"));
     }
 
     let resolvedParentId = null;
@@ -52,7 +49,10 @@ export const createComment = async (req, res, next) => {
       parentId: resolvedParentId,
     });
     await newComment.save();
-    res.status(201).json(newComment);
+    res
+      .status(201)
+      .location(`/api/comments/${newComment._id}`)
+      .json(newComment);
   } catch (error) {
     next(error);
   }
@@ -60,6 +60,11 @@ export const createComment = async (req, res, next) => {
 
 export const getPostComments = async (req, res, next) => {
   try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) {
+      return next(errorHandler(404, "Post not found"));
+    }
+
     const comments = await Comment.find({ postId: req.params.postId })
       .populate("userId", "username profilePicture")
       .sort({ createdAt: -1 });
@@ -135,10 +140,10 @@ export const deleteComment = async (req, res, next) => {
     const result = await Comment.deleteMany({
       $or: [{ _id: comment._id }, { parentId: comment._id }],
     });
-    res.status(200).json({
-      message: "Comment has been deleted",
-      deletedCount: result.deletedCount,
-    });
+    if (result.deletedCount === 0) {
+      return next(errorHandler(404, "Comment not found"));
+    }
+    res.status(204).end();
   } catch (error) {
     next(error);
   }
@@ -175,20 +180,9 @@ export const getComments = async (req, res, next) => {
       .limit(limit);
 
     const totalComments = await Comment.countDocuments(query);
-    const now = new Date();
-    const oneMonthAgo = new Date(
-      now.getFullYear(),
-      now.getMonth() - 1,
-      now.getDate(),
-    );
-    const lastMonthComments = await Comment.countDocuments({
-      createdAt: { $gte: oneMonthAgo },
-    });
-
     res.status(200).json({
       comments,
-      totalComments,
-      lastMonthComments,
+      total: totalComments,
     });
   } catch (error) {
     next(error);

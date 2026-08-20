@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import postRoutes from "./routes/post.route.js";
 import commentRoutes from "./routes/comment.route.js";
 import categoryRoutes from "./routes/category.route.js";
+import statsRoutes from "./routes/stats.route.js";
 import { seedCategories } from "./utils/seedCategories.js";
 
 dotenv.config();
@@ -30,11 +31,12 @@ app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
 
-app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/post", postRoutes);
-app.use("/api/comment", commentRoutes);
-app.use("/api/category", categoryRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/stats", statsRoutes);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

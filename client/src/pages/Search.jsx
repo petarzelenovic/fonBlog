@@ -74,7 +74,7 @@ export default function Search() {
       try {
         setLoading(true);
         const params = new URLSearchParams(location.search);
-        const response = await fetch(`/api/post/getposts?${params.toString()}`);
+        const response = await fetch(`/api/posts?${params.toString()}`);
         const data = await response.json();
         if (!response.ok) {
           setError(data.message);
@@ -84,7 +84,7 @@ export default function Search() {
         }
 
         setPosts(data.posts);
-        setTotalPosts(data.totalPosts);
+        setTotalPosts(data.total);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -105,12 +105,12 @@ export default function Search() {
       setLoadingMore(true);
       const params = new URLSearchParams(location.search);
       params.set("startIndex", String(posts.length));
-      const response = await fetch(`/api/post/getposts?${params.toString()}`);
+      const response = await fetch(`/api/posts?${params.toString()}`);
       const data = await response.json();
       if (!response.ok) return;
 
       setPosts((previousPosts) => [...previousPosts, ...data.posts]);
-      setTotalPosts(data.totalPosts);
+      setTotalPosts(data.total);
     } catch (err) {
       console.log(err.message);
     } finally {

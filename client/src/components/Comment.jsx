@@ -34,8 +34,8 @@ export default function Comment({
 
   const handleSave = async () => {
     try {
-      const res = await fetch(`/api/comment/editComment/${comment._id}`, {
-        method: "PUT",
+      const res = await fetch(`/api/comments/${comment._id}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

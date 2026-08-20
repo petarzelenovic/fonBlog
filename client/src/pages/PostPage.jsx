@@ -57,15 +57,15 @@ export default function PostPage() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/post/getposts?slug=${postSlug}`);
+        const response = await fetch(`/api/posts/${postSlug}`);
         const data = await response.json();
         if (!response.ok) {
           setError(data.message);
           setPost(null);
           return;
         }
-        setPost(data.posts[0] || null);
-        setError(data.posts[0] ? null : "Objava nije pronađena");
+        setPost(data);
+        setError(null);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -80,14 +80,14 @@ export default function PostPage() {
     const fetchRelatedPosts = async () => {
       try {
         const response = await fetch(
-          `/api/post/getposts?category=${post.category}&limit=7`,
+          `/api/posts?category=${post.category}&limit=4`,
         );
         const data = await response.json();
         if (response.ok) {
           setRelatedPosts(
             data.posts
               .filter((relatedPost) => relatedPost._id !== post._id)
-              .slice(0, 6),
+              .slice(0, 3),
           );
         }
       } catch (err) {
@@ -100,7 +100,7 @@ export default function PostPage() {
   useEffect(() => {
     const fetchRecentPosts = async () => {
       try {
-        const response = await fetch("/api/post/getposts?limit=5");
+        const response = await fetch("/api/posts?limit=5");
         const data = await response.json();
         if (response.ok) {
           setRecentPosts(data.posts);

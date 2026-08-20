@@ -33,38 +33,49 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchStats = async () => {
+      const response = await fetch("/api/stats");
+      const data = await response.json();
+      if (response.ok) {
+        setTotalUsers(data.users.total);
+        setLastMonthUsers(data.users.lastMonth);
+        setTotalComments(data.comments.total);
+        setLastMonthComments(data.comments.lastMonth);
+        setTotalPosts(data.posts.total);
+        setLastMonthPosts(data.posts.lastMonth);
+      }
+    };
     const fetchUsers = async () => {
-      const response = await fetch("/api/user/getusers?limit=5");
+      const response = await fetch("/api/users?limit=5");
       const data = await response.json();
       if (response.ok) {
         setUsers(data.users);
-        setTotalUsers(data.total);
-        setLastMonthUsers(data.lastMonthUsers);
       }
     };
     const fetchComments = async () => {
-      const response = await fetch("/api/comment/getcomments?limit=5");
+      const response = await fetch("/api/comments?limit=5");
       const data = await response.json();
       if (response.ok) {
         setComments(data.comments);
-        setTotalComments(data.totalComments);
-        setLastMonthComments(data.lastMonthComments);
       }
     };
     const fetchPosts = async () => {
-      const response = await fetch("/api/post/getposts?limit=5");
+      const response = await fetch("/api/posts?limit=5");
       const data = await response.json();
       if (response.ok) {
         setPosts(data.posts);
-        setTotalPosts(data.totalPosts);
-        setLastMonthPosts(data.lastMonthPosts);
       }
     };
 
     const loadOverview = async () => {
       try {
         setLoading(true);
-        await Promise.all([fetchUsers(), fetchComments(), fetchPosts()]);
+        await Promise.all([
+          fetchStats(),
+          fetchUsers(),
+          fetchComments(),
+          fetchPosts(),
+        ]);
       } catch (error) {
         console.log(error.message);
       } finally {
