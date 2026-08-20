@@ -2,11 +2,12 @@ import { Link } from "react-router-dom";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
 import { formatDate } from "../utils/formatDate.js";
 
-export default function PostCard({ post, author, layout = "list" }) {
+export default function PostCard({ post, layout = "list" }) {
   const { getCategoryColor, getCategoryName, getCategoryTextColor } =
     useCategories();
   const excerpt = post.shortDescription?.trim();
   const isGrid = layout === "grid";
+  const author = post.userId;
 
   return (
     <article

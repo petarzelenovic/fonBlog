@@ -17,6 +17,7 @@ import {
 } from "flowbite-react";
 import { Link } from "react-router-dom";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { POSTS_LIMIT } from "../constants.js";
 
 export default function DashPosts() {
   const { currentUser } = useSelector((state) => state.user);
@@ -31,15 +32,15 @@ export default function DashPosts() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const startIndex = (currentPage - 1) * 9;
+        const startIndex = (currentPage - 1) * POSTS_LIMIT;
         const response = await fetch(
-          `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}`,
+          `/api/post/getposts?userId=${currentUser._id}&startIndex=${startIndex}&limit=${POSTS_LIMIT}`,
         );
         const data = await response.json();
         if (response.ok) {
           setUserPosts(data.posts);
           setTotalPosts(data.totalPosts);
-          setTotalPages(Math.ceil(data.totalPosts / 9) || 1);
+          setTotalPages(Math.ceil(data.totalPosts / POSTS_LIMIT) || 1);
         }
       } catch (error) {
         console.log(error.message);

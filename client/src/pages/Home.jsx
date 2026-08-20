@@ -3,15 +3,12 @@ import { useEffect, useState } from "react";
 import { Button, Spinner } from "flowbite-react";
 import PostCard from "../components/PostCard.jsx";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
-import { fetchAuthorsByIds } from "../utils/fetchAuthors.js";
+import { POSTS_LIMIT } from "../constants.js";
 import heroImage from "../assets/hero-image.jpg";
-
-const POSTS_LIMIT = 9;
 
 export default function Home() {
   const { categories } = useCategories();
   const [posts, setPosts] = useState([]);
-  const [authors, setAuthors] = useState({});
   const [totalPosts, setTotalPosts] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -33,12 +30,6 @@ export default function Home() {
 
         setPosts(data.posts);
         setTotalPosts(data.totalPosts);
-        setAuthors(
-          await fetchAuthorsByIds(
-            data.posts.map((post) => post.userId),
-            {},
-          ),
-        );
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -64,12 +55,7 @@ export default function Home() {
         return;
       }
 
-      const nextAuthors = await fetchAuthorsByIds(
-        data.posts.map((post) => post.userId),
-        authors,
-      );
       setPosts((previousPosts) => [...previousPosts, ...data.posts]);
-      setAuthors(nextAuthors);
       setTotalPosts(data.totalPosts);
     } catch (err) {
       console.log(err.message);
@@ -148,11 +134,7 @@ export default function Home() {
             <>
               <div className="space-y-10">
                 {posts.map((post) => (
-                  <PostCard
-                    key={post._id}
-                    post={post}
-                    author={authors[post.userId]}
-                  />
+                  <PostCard key={post._id} post={post} />
                 ))}
               </div>
 
@@ -161,7 +143,7 @@ export default function Home() {
                   <Button
                     onClick={handleShowMore}
                     disabled={loadingMore}
-                    className="bg-fon-navy text-white hover:bg-fon-navy-hover"
+                    className="bg-fon-navy text-white hover:bg-fon-navy-hover cursor-pointer"
                   >
                     {loadingMore ? (
                       <>

@@ -48,7 +48,6 @@ export default function PostPage() {
     useCategories();
   const { postSlug } = useParams();
   const [post, setPost] = useState(null);
-  const [author, setAuthor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [recentPosts, setRecentPosts] = useState([]);
@@ -76,21 +75,6 @@ export default function PostPage() {
     };
     fetchPost();
   }, [postSlug]);
-
-  useEffect(() => {
-    if (!post?.userId) return;
-    const fetchAuthor = async () => {
-      try {
-        const response = await fetch(`/api/user/${post.userId}`);
-        if (response.ok) {
-          setAuthor(await response.json());
-        }
-      } catch (err) {
-        console.log(err.message);
-      }
-    };
-    fetchAuthor();
-  }, [post]);
 
   useEffect(() => {
     if (!post?.category) return;
@@ -210,14 +194,14 @@ export default function PostPage() {
               <div className="mb-8 flex flex-col gap-4 border-b border-fon-border pb-6 sm:flex-row sm:items-center sm:justify-between dark:border-fon-dark-border">
                 <div className="flex items-center gap-3 text-sm text-fon-muted dark:text-fon-dark-muted">
                   <img
-                    src={author?.profilePicture || defaultAvatar}
-                    alt={author?.username || "Autor"}
+                    src={post.userId?.profilePicture || defaultAvatar}
+                    alt={post.userId?.username || "Autor"}
                     className="h-8 w-8 rounded-full object-cover"
                   />
                   <p>
                     Napisao je{" "}
                     <span className="font-semibold text-fon-navy dark:text-white">
-                      {author?.username || "Fon Blog"}
+                      {post.userId?.username || "Fon Blog"}
                     </span>
                     <span className="mx-2">·</span>
                     <time dateTime={post.createdAt}>

@@ -28,14 +28,31 @@ export const create = async (req, res, next) => {
   }
 };
 
+function parseCategoryQuery(value) {
+  if (!value) return [];
+  const values = Array.isArray(value) ? value : [value];
+  return [
+    ...new Set(
+      values
+        .flatMap((item) => String(item).split(","))
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
 export const getPosts = async (req, res, next) => {
   try {
     const startIndex = parseInt(req.query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
-    const sortDirection = req.query.sortDirection === "asc" ? 1 : -1;
-    const posts = await Post.find({
+    const sortDirection = req.query.sort === "asc" ? 1 : -1;
+    const selectedCategories = parseCategoryQuery(req.query.category);
+    const query = {
       ...(req.query.userId && { userId: req.query.userId }),
-      ...(req.query.category && { category: req.query.category }),
+      ...(selectedCategories.length === 1 && { category: selectedCategories[0] }),
+      ...(selectedCategories.length > 1 && {
+        category: { $in: selectedCategories },
+      }),
       ...(req.query.slug && { slug: req.query.slug }),
       ...(req.query.postId && { _id: req.query.postId }),
       ...(req.query.searchTerm && {
@@ -44,12 +61,14 @@ export const getPosts = async (req, res, next) => {
           { content: { $regex: req.query.searchTerm, $options: "i" } },
         ],
       }),
-    })
+    };
+    const posts = await Post.find(query)
+      .populate("userId", "username profilePicture")
       .sort({ updatedAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
 
-    const totalPosts = await Post.countDocuments();
+    const totalPosts = await Post.countDocuments(query);
 
     const now = new Date();
     const oneMonthAgo = new Date(

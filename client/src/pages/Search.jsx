@@ -1,193 +1,265 @@
-import { Button, Select, Spinner, TextInput } from "flowbite-react";
-import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Button, Spinner } from "flowbite-react";
 import PostCard from "../components/PostCard.jsx";
 import { useCategories } from "../contexts/CategoriesContext.jsx";
-import { fetchAuthorsByIds } from "../utils/fetchAuthors.js";
+
+function buildSearchUrl({ searchTerm = "", sort = "desc", categories = [] }) {
+  const params = new URLSearchParams();
+  if (searchTerm.trim()) params.set("searchTerm", searchTerm.trim());
+  if (sort && sort !== "desc") params.set("sort", sort);
+  if (categories.length) params.set("category", categories.join(","));
+  const query = params.toString();
+  return query ? `/search?${query}` : "/search";
+}
+
+function splitCategories(value) {
+  return value ? value.split(",") : [];
+}
+
+function formatPostCount(count) {
+  const lastTwo = count % 100;
+  const last = count % 10;
+  if (last === 1 && lastTwo !== 11) return `${count} objava`;
+  if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) {
+    return `${count} objave`;
+  }
+  return `${count} objava`;
+}
 
 export default function Search() {
-  const { categories } = useCategories();
+  const { categories, getCategoryName } = useCategories();
   const location = useLocation();
-  const navigate = useNavigate();
-  const [sidebarData, setSidebarData] = useState({
-    searchTerm: "",
-    sort: "desc",
-    category: "",
-  });
+  const urlParams = new URLSearchParams(location.search);
+  const searchTerm = urlParams.get("searchTerm") || "";
+  const sort = urlParams.get("sort") || "desc";
+  const selectedCategories = splitCategories(urlParams.get("category"));
 
   const [posts, setPosts] = useState([]);
-  const [authors, setAuthors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [showMore, setShowMore] = useState(false);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get("searchTerm");
-    const sortFromUrl = urlParams.get("sort");
-    const categoryFromUrl = urlParams.get("category");
-    setSidebarData({
-      searchTerm: searchTermFromUrl || "",
-      sort: sortFromUrl || "desc",
-      category: categoryFromUrl || "",
+  const showMore = posts.length < totalPosts;
+  const hasFilters = Boolean(
+    searchTerm || selectedCategories.length || sort === "asc",
+  );
+  const selectedCategoryNames = selectedCategories.map(getCategoryName);
+  const categoryLabel = selectedCategoryNames.join(", ");
+
+  let heading = "Sve objave";
+  if (searchTerm && categoryLabel) {
+    heading =
+      selectedCategories.length > 1
+        ? `„${searchTerm}" u kategorijama ${categoryLabel}`
+        : `„${searchTerm}" u kategoriji ${categoryLabel}`;
+  } else if (searchTerm) {
+    heading = `Rezultati za „${searchTerm}"`;
+  } else if (categoryLabel) {
+    heading = categoryLabel;
+  }
+
+  const toggleCategoryUrl = (slug) =>
+    buildSearchUrl({
+      searchTerm,
+      sort,
+      categories: selectedCategories.includes(slug)
+        ? selectedCategories.filter((item) => item !== slug)
+        : [...selectedCategories, slug],
     });
 
+  useEffect(() => {
     const fetchPosts = async () => {
-      setLoading(true);
-      const searchQuery = urlParams.toString();
+      try {
+        setLoading(true);
+        const params = new URLSearchParams(location.search);
+        const response = await fetch(`/api/post/getposts?${params.toString()}`);
+        const data = await response.json();
+        if (!response.ok) {
+          setError(data.message);
+          setPosts([]);
+          setTotalPosts(0);
+          return;
+        }
 
-      const response = await fetch(`/api/post/getposts?${searchQuery}`);
-      if (!response.ok) {
+        setPosts(data.posts);
+        setTotalPosts(data.totalPosts);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        setPosts([]);
+        setTotalPosts(0);
+      } finally {
         setLoading(false);
-        return;
-      }
-      const data = await response.json();
-      setPosts(data.posts);
-      setAuthors(
-        await fetchAuthorsByIds(
-          data.posts.map((post) => post.userId),
-          {},
-        ),
-      );
-      setLoading(false);
-      if (data.totalPosts <= 9) {
-        setShowMore(false);
-      } else {
-        setShowMore(true);
       }
     };
+
     fetchPosts();
   }, [location.search]);
 
-  const handleChange = (e) => {
-    if (e.target.id === "searchTerm") {
-      setSidebarData({ ...sidebarData, searchTerm: e.target.value });
-    } else if (e.target.id === "sort") {
-      const order = e.target.value || "desc";
-      setSidebarData({ ...sidebarData, sort: order });
-    } else if (e.target.id === "category") {
-      const category = e.target.value;
-      setSidebarData({ ...sidebarData, category });
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const urlParams = new URLSearchParams(location.search);
-    const trimmedSearchTerm = sidebarData.searchTerm.trim();
-    if (trimmedSearchTerm) {
-      urlParams.set("searchTerm", trimmedSearchTerm);
-    } else {
-      urlParams.delete("searchTerm");
-    }
-    urlParams.set("sort", sidebarData.sort);
-    if (sidebarData.category) {
-      urlParams.set("category", sidebarData.category);
-    } else {
-      urlParams.delete("category");
-    }
-    const searchQuery = urlParams.toString();
-    navigate(`/search?${searchQuery}`);
-  };
-
   const handleShowMore = async () => {
-    const numberOfPosts = posts.length;
-    const startIndex = numberOfPosts;
-    const urlParams = new URLSearchParams(location.search);
-    urlParams.set("startIndex", startIndex);
-    const searchQuery = urlParams.toString();
-    const response = await fetch(`/api/post/getposts?${searchQuery}`);
-    if (!response.ok) {
-      return;
-    }
-    const data = await response.json();
-    setAuthors(
-      await fetchAuthorsByIds(
-        data.posts.map((post) => post.userId),
-        authors,
-      ),
-    );
-    setPosts([...posts, ...data.posts]);
-    if (data.posts.length === 9) {
-      setShowMore(true);
-    } else {
-      setShowMore(false);
+    if (loadingMore || !showMore) return;
+
+    try {
+      setLoadingMore(true);
+      const params = new URLSearchParams(location.search);
+      params.set("startIndex", String(posts.length));
+      const response = await fetch(`/api/post/getposts?${params.toString()}`);
+      const data = await response.json();
+      if (!response.ok) return;
+
+      setPosts((previousPosts) => [...previousPosts, ...data.posts]);
+      setTotalPosts(data.totalPosts);
+    } catch (err) {
+      console.log(err.message);
+    } finally {
+      setLoadingMore(false);
     }
   };
+
+  const chipClass = (isActive) =>
+    isActive
+      ? "rounded-full border border-fon-navy px-3.5 py-1.5 text-sm font-medium text-fon-navy dark:border-white dark:text-white"
+      : "rounded-full px-3.5 py-1.5 text-sm text-fon-muted hover:text-fon-navy dark:text-fon-dark-muted dark:hover:text-white";
+
+  const sortClass = (isActive) =>
+    isActive
+      ? "text-sm font-medium text-fon-navy dark:text-white"
+      : "text-sm text-fon-muted hover:text-fon-navy dark:text-fon-dark-muted dark:hover:text-white";
 
   return (
-    <div className="flex flex-col md:flex-row">
-      <div className="border-b border-fon-border bg-white p-7 md:min-h-screen md:border-r dark:border-fon-dark-border dark:bg-fon-dark-surface">
-        <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-fon-navy dark:text-white">Search Term:</label>
-            <TextInput
-              type="text"
-              placeholder="Search..."
-              id="searchTerm"
-              value={sidebarData.searchTerm}
-              onChange={handleChange}
-            />
+    <main className="bg-white dark:bg-fon-dark">
+      <div className="mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-6 lg:px-8 lg:pt-10 lg:pb-16">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-extrabold tracking-tight text-fon-navy dark:text-white md:text-3xl">
+              {heading}
+            </h1>
+            <p className="mt-1 text-sm text-fon-muted dark:text-fon-dark-muted">
+              {loading
+                ? "Učitavanje objava..."
+                : error
+                  ? "Pretraga trenutno nije uspela"
+                  : `${formatPostCount(totalPosts)}`}
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-fon-navy dark:text-white">Sort:</label>
-            <Select id="sort" value={sidebarData.sort} onChange={handleChange}>
-              <option value="desc">Newest</option>
-              <option value="asc">Oldest</option>
-            </Select>
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-fon-muted dark:text-fon-dark-muted">
+                Sortiraj
+              </span>
+              <Link
+                to={buildSearchUrl({
+                  searchTerm,
+                  categories: selectedCategories,
+                  sort: "desc",
+                })}
+                className={sortClass(sort === "desc")}
+              >
+                Najnovije
+              </Link>
+              <Link
+                to={buildSearchUrl({
+                  searchTerm,
+                  categories: selectedCategories,
+                  sort: "asc",
+                })}
+                className={sortClass(sort === "asc")}
+              >
+                Najstarije
+              </Link>
+            </div>
+            {hasFilters && (
+              <Link
+                to="/search"
+                className="text-sm font-medium text-fon-magenta hover:underline"
+              >
+                Poništi filtere
+              </Link>
+            )}
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-fon-navy dark:text-white">Category:</label>
-            <Select
-              id="category"
-              value={sidebarData.category}
-              onChange={handleChange}
-            >
-              <option value="">Sve kategorije</option>
-              {categories.map((category) => (
-                <option key={category._id} value={category.slug}>
-                  {category.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <Button type="submit" className="bg-fon-navy text-white hover:bg-fon-navy-hover">Search</Button>
-        </form>
-      </div>
-      <div className="w-full">
-        <h1 className="mt-5 p-3 text-3xl font-semibold text-fon-navy dark:text-white">Search Results</h1>
-        <div className="p-7">
-          {!loading && posts.length === 0 && (
-            <div className="flex h-full items-center justify-center">
-              <p className="text-fon-muted">No posts found</p>
-            </div>
-          )}
-          {loading && (
-            <div className="flex h-full items-center justify-center">
-              <Spinner size="lg" />
-            </div>
-          )}
-          {!loading && posts.length > 0 && (
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
-              {posts.map((post) => (
-                <PostCard
-                  key={post._id}
-                  post={post}
-                  author={authors[post.userId]}
-                  layout="grid"
-                />
-              ))}
-            </div>
-          )}
-          {showMore && (
-            <button
-              onClick={handleShowMore}
-              className="w-full p-7 text-lg text-fon-magenta hover:underline"
-            >
-              Show More
-            </button>
-          )}
         </div>
+
+        <nav
+          className="mb-10 flex flex-wrap items-center gap-x-2 gap-y-3 border-b border-fon-border pb-6 dark:border-fon-dark-border"
+          aria-label="Kategorije"
+        >
+          <Link
+            to={buildSearchUrl({ searchTerm, sort, categories: [] })}
+            className={chipClass(selectedCategories.length === 0)}
+          >
+            Sve kategorije
+          </Link>
+          {categories.map((item) => (
+            <Link
+              key={item._id}
+              to={toggleCategoryUrl(item.slug)}
+              className={chipClass(selectedCategories.includes(item.slug))}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+
+        {loading ? (
+          <div className="flex min-h-64 items-center justify-center">
+            <Spinner size="xl" />
+          </div>
+        ) : error ? (
+          <div className="py-16 text-center">
+            <h2 className="mb-2 text-2xl font-bold text-fon-navy dark:text-white">
+              Objave nisu učitane
+            </h2>
+            <p className="text-fon-muted dark:text-fon-dark-muted">{error}</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="py-16 text-center">
+            <h2 className="mb-2 text-2xl font-bold text-fon-navy dark:text-white">
+              Nema rezultata
+            </h2>
+            <p className="text-fon-muted dark:text-fon-dark-muted">
+              Pokušaj sa drugom pretragom ili kategorijom.
+            </p>
+            {hasFilters && (
+              <Link
+                to="/search"
+                className="mt-4 inline-flex text-sm font-medium text-fon-magenta hover:underline"
+              >
+                Prikaži sve objave
+              </Link>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="space-y-10">
+              {posts.map((post) => (
+                <PostCard key={post._id} post={post} />
+              ))}
+            </div>
+
+            {showMore && (
+              <div className="mt-12 flex justify-center">
+                <Button
+                  onClick={handleShowMore}
+                  disabled={loadingMore}
+                  className="cursor-pointer bg-fon-navy text-white hover:bg-fon-navy-hover"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Spinner size="sm" className="mr-2" />
+                      Učitavanje...
+                    </>
+                  ) : (
+                    "Prikaži još"
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
