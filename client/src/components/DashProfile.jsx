@@ -188,7 +188,7 @@ export default function DashProfile() {
                   position: "absolute",
                 },
                 path: {
-                  stroke: `rgba(62,152,199, ${imageFileUploadProgress / 100})`,
+                  stroke: `rgba(0, 74, 124, ${imageFileUploadProgress / 100})`,
                 },
               }}
             />

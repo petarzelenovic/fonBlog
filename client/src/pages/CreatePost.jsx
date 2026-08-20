@@ -172,7 +172,7 @@ export default function CreatePost() {
           required
           onChange={(value) => setFormData({ ...formData, content: value })}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full bg-fon-navy text-white hover:bg-fon-navy-hover">
           Publish
         </Button>
         {publishError && (

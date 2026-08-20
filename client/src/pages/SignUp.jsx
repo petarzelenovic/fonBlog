@@ -50,13 +50,11 @@ export default function SignUp() {
     <div className="min-h-screen mt-20">
       <div className="flex p-3 max-w-3xl mx-auto flex-col md:flex-row md:items-center gap-4">
         <div className="flex-1">
-          <Link to="/" className="font-bold text-4xl dark:text-white">
-            <span className="px-2 py-1 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-lg text-white">
-              Fon
-            </span>
-            Blog
+          <Link to="/" className="text-4xl font-bold">
+            <span className="text-fon-navy dark:text-white">Fon</span>
+            <span className="text-fon-magenta">Blog</span>
           </Link>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-5">Create an account</p>
+          <p className="mt-5 text-sm text-fon-muted dark:text-fon-dark-muted">Create an account</p>
         </div>
         <div className="flex-1">
           <form onSubmit={handleSubmit}>
@@ -90,7 +88,7 @@ export default function SignUp() {
                 onChange={handleChange}
               />
             </div>
-            <Button type="submit" className="w-full mt-5" disabled={loading}>
+            <Button type="submit" className="mt-5 w-full bg-fon-navy text-white hover:bg-fon-navy-hover" disabled={loading}>
               {loading ? (
                 <>
                   <Spinner size="sm" color="gray" />{" "}
@@ -112,9 +110,9 @@ export default function SignUp() {
             )}
           </form>
           <div className="">
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-fon-muted dark:text-fon-dark-muted">
               Already have an account?{" "}
-              <Link to="/sign-in" className="text-blue-500">
+              <Link to="/sign-in" className="text-fon-magenta hover:underline">
                 Sign In
               </Link>
             </span>

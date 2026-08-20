@@ -4,6 +4,39 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-fon-navy: #004a7c;
+  --color-fon-navy-hover: #003a62;
+  --color-fon-magenta: #d058a0;
+  --color-fon-magenta-hover: #b8478c;
+  --color-fon-teal: #60c3ad;
+  --color-fon-gold: #ffcd67;
+  --color-fon-coral: #f48580;
+  --color-fon-lavender: #9b95c9;
+  --color-fon-bg: #f7f9fb;
+  --color-fon-surface: #ffffff;
+  --color-fon-text: #173042;
+  --color-fon-muted: #617486;
+  --color-fon-border: #dce5ea;
+  --color-fon-dark: #0e1a24;
+  --color-fon-dark-surface: #162533;
+  --color-fon-dark-border: #2a3f4e;
+  --color-fon-dark-text: #e8eef2;
+  --color-fon-dark-muted: #9aadc0;
+
+  --color-blue-50: #e6f1f7;
+  --color-blue-100: #cce3ef;
+  --color-blue-200: #99c7df;
+  --color-blue-300: #66abcf;
+  --color-blue-400: #338fbf;
+  --color-blue-500: #1a6a9a;
+  --color-blue-600: #004a7c;
+  --color-blue-700: #003a62;
+  --color-blue-800: #002b49;
+  --color-blue-900: #001c31;
+  --color-blue-950: #00101c;
+}
+
 @layer base {
   html {
     color-scheme: light;
@@ -16,7 +49,7 @@
   html,
   body,
   #root {
-    @apply min-h-screen bg-white text-gray-700 dark:bg-[rgb(16,23,42)] dark:text-gray-200;
+    @apply min-h-screen bg-fon-bg text-fon-text dark:bg-fon-dark dark:text-fon-dark-text;
   }
 }
 
@@ -49,7 +82,7 @@ body {
   word-break: break-word;
   font-size: 1.125rem;
   line-height: 1.75;
-  color: rgb(55 65 81);
+  color: #173042;
 }
 
 .post-content > * {
@@ -70,7 +103,7 @@ body {
 }
 
 .dark .post-content {
-  color: rgb(209 213 219);
+  color: #e8eef2;
 }
 
 .post-content p {
@@ -87,7 +120,7 @@ body {
   margin-bottom: 1.5rem;
   text-align: center;
   font-size: 0.875rem;
-  color: rgb(107 114 128);
+  color: #617486;
 }
 
 .post-content h1 {
@@ -95,21 +128,21 @@ body {
   font-weight: 800;
   letter-spacing: -0.025em;
   margin: 1.75rem 0 1rem;
-  color: rgb(17 24 39);
+  color: #004a7c;
 }
 
 .post-content h2 {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 1.75rem 0 0.75rem;
-  color: rgb(17 24 39);
+  color: #004a7c;
 }
 
 .post-content h3 {
   font-size: 1.25rem;
   font-weight: 700;
   margin: 1.5rem 0 0.75rem;
-  color: rgb(17 24 39);
+  color: #004a7c;
 }
 
 .dark .post-content h1,
@@ -119,13 +152,13 @@ body {
 }
 
 .post-content a {
-  color: rgb(29 78 216);
+  color: #d058a0;
   font-weight: 500;
   text-decoration: underline;
 }
 
 .dark .post-content a {
-  color: rgb(96 165 250);
+  color: #e07ab8;
 }
 
 .post-content img,
@@ -174,10 +207,10 @@ body {
 
 .post-content blockquote {
   margin: 1.5rem 0;
-  border-left: 4px solid rgb(59 130 246);
+  border-left: 4px solid #60c3ad;
   padding-left: 1rem;
   font-style: italic;
-  color: rgb(75 85 99);
+  color: #617486;
 }
 
 .dark .post-content blockquote {

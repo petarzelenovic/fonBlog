@@ -44,7 +44,8 @@ function formatMetaDate(dateString) {
 }
 
 export default function PostPage() {
-  const { getCategoryColor, getCategoryName } = useCategories();
+  const { getCategoryColor, getCategoryName, getCategoryTextColor } =
+    useCategories();
   const { postSlug } = useParams();
   const [post, setPost] = useState(null);
   const [author, setAuthor] = useState(null);
@@ -139,13 +140,13 @@ export default function PostPage() {
   if (error || !post) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 px-4 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-fon-navy dark:text-white">
           Objava nije pronađena
         </h1>
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className="text-fon-muted dark:text-fon-dark-muted">
           {error || "Ovaj članak ne postoji ili je uklonjen."}
         </p>
-        <Link to="/search" className="text-blue-600 hover:underline">
+        <Link to="/search" className="text-fon-magenta hover:underline">
           Pregledaj objave
         </Link>
       </div>
@@ -157,7 +158,7 @@ export default function PostPage() {
     .slice(0, 4);
   const shareUrl = `${window.location.origin}/post/${post.slug}`;
   const copyBtnClass =
-    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white";
+    "inline-flex h-8 w-8 items-center justify-center rounded-lg text-fon-muted hover:bg-fon-bg hover:text-fon-navy dark:text-fon-dark-muted dark:hover:bg-fon-dark dark:hover:text-white";
 
   const copyLink = async () => {
     try {
@@ -170,20 +171,23 @@ export default function PostPage() {
   };
 
   return (
-    <main className="bg-white dark:bg-gray-900">
+    <main className="bg-fon-bg dark:bg-fon-dark">
       <section className="relative isolate h-96 w-full overflow-hidden sm:h-112 lg:h-128">
         <img
           src={post.image}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gray-900/55" />
+        <div className="absolute inset-0 bg-fon-navy/70" />
         <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           <div className="w-full lg:w-8/12 lg:pr-12">
             <Link
               to={`/search?category=${post.category}`}
-              className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white backdrop-blur-sm hover:opacity-90"
-              style={{ backgroundColor: getCategoryColor(post.category) }}
+              className="mb-4 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium backdrop-blur-sm hover:opacity-90"
+              style={{
+                backgroundColor: getCategoryColor(post.category),
+                color: getCategoryTextColor(post.category),
+              }}
             >
               {getCategoryName(post.category)}
             </Link>
@@ -200,11 +204,11 @@ export default function PostPage() {
       </section>
 
       <div className="relative z-20 mx-auto -mt-10 max-w-7xl px-4 sm:-mt-14 sm:px-6 lg:-mt-16 lg:px-8">
-        <div className="rounded-t-2xl bg-white px-4 pt-8 pb-8 dark:bg-gray-900 sm:px-6 lg:px-8 lg:pt-12 lg:pb-12">
+        <div className="rounded-t-2xl bg-white px-4 pt-8 pb-8 dark:bg-fon-dark-surface sm:px-6 lg:px-8 lg:pt-12 lg:pb-12">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <article className="min-w-0 lg:col-span-8">
-              <div className="mb-8 flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
-                <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+              <div className="mb-8 flex flex-col gap-4 border-b border-fon-border pb-6 sm:flex-row sm:items-center sm:justify-between dark:border-fon-dark-border">
+                <div className="flex items-center gap-3 text-sm text-fon-muted dark:text-fon-dark-muted">
                   <img
                     src={author?.profilePicture || defaultAvatar}
                     alt={author?.username || "Autor"}
@@ -212,7 +216,7 @@ export default function PostPage() {
                   />
                   <p>
                     Napisao je{" "}
-                    <span className="font-semibold text-gray-900 dark:text-white">
+                    <span className="font-semibold text-fon-navy dark:text-white">
                       {author?.username || "Fon Blog"}
                     </span>
                     <span className="mx-2">·</span>
@@ -242,11 +246,11 @@ export default function PostPage() {
             </article>
 
             <aside className="lg:col-span-4" aria-label="Najnovije vesti">
-              <h2 className="mb-6 text-sm font-bold uppercase tracking-wide text-gray-900 dark:text-white">
+              <h2 className="mb-6 text-sm font-bold tracking-wide text-fon-navy uppercase dark:text-white">
                 Najnovije vesti
               </h2>
               {latestPosts.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-fon-muted dark:text-fon-dark-muted">
                   Još nema drugih članaka.
                 </p>
               ) : (
@@ -265,15 +269,15 @@ export default function PostPage() {
                           className="h-20 w-20 shrink-0 rounded-lg object-cover"
                         />
                         <div className="min-w-0">
-                          <h3 className="mb-1 text-base font-bold leading-snug text-gray-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-500">
+                          <h3 className="mb-1 text-base leading-snug font-bold text-fon-navy group-hover:text-fon-magenta dark:text-white dark:group-hover:text-fon-magenta">
                             {latestPost.title}
                           </h3>
                           {latestPost.shortDescription?.trim() && (
-                            <p className="mb-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+                            <p className="mb-2 line-clamp-2 text-sm text-fon-muted dark:text-fon-dark-muted">
                               {latestPost.shortDescription.trim()}
                             </p>
                           )}
-                          <span className="text-sm font-medium text-blue-600 dark:text-blue-500">
+                          <span className="text-sm font-medium text-fon-magenta">
                             {formatReadingTime(minutes)}
                           </span>
                         </div>
@@ -287,10 +291,10 @@ export default function PostPage() {
 
           {relatedPosts.length > 0 && (
             <section
-              className="mt-12 border-t border-gray-200 pt-10 dark:border-gray-700"
+              className="mt-12 border-t border-fon-border pt-10 dark:border-fon-dark-border"
               aria-label="Sledeće za čitanje"
             >
-              <h2 className="mb-8 text-2xl font-bold text-gray-900 dark:text-white">
+              <h2 className="mb-8 text-2xl font-bold text-fon-navy dark:text-white">
                 Pročitaj sledeće
               </h2>
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -302,10 +306,10 @@ export default function PostPage() {
                         alt={relatedPost.title}
                         className="mb-4 w-full rounded-lg object-cover aspect-video"
                       />
-                      <h3 className="mb-3 text-lg font-bold leading-snug text-gray-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-500">
+                      <h3 className="mb-3 text-lg leading-snug font-bold text-fon-navy group-hover:text-fon-magenta dark:text-white dark:group-hover:text-fon-magenta">
                         {relatedPost.title}
                       </h3>
-                      <span className="text-sm font-medium text-blue-600 group-hover:underline dark:text-blue-500">
+                      <span className="text-sm font-medium text-fon-magenta group-hover:underline">
                         Pročitaj više
                       </span>
                     </Link>

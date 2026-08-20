@@ -49,7 +49,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
     <article className="py-6 text-base">
       <footer className="mb-2 flex items-center justify-between">
         <div className="flex items-center">
-          <p className="mr-3 inline-flex items-center text-sm font-semibold text-gray-900 dark:text-white">
+          <p className="mr-3 inline-flex items-center text-sm font-semibold text-fon-navy dark:text-white">
             <img
               className="mr-2 h-6 w-6 rounded-full object-cover"
               src={profilePicture}
@@ -57,7 +57,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
             />
             {username}
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-fon-muted dark:text-fon-dark-muted">
             <time dateTime={comment.createdAt}>
               {formatCommentDate(comment.createdAt)}
             </time>
@@ -101,7 +101,7 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
             <Button
               type="button"
               size="xs"
-              className="bg-blue-700 text-white"
+              className="bg-fon-navy text-white hover:bg-fon-navy-hover"
               onClick={handleSave}
               disabled={editedContent.trim().length === 0}
             >
@@ -122,12 +122,12 @@ export default function Comment({ comment, onLike, onEdit, onDelete }) {
         </>
       ) : (
         <>
-          <p className="text-gray-500 dark:text-gray-400">{comment.content}</p>
+          <p className="text-fon-muted dark:text-fon-dark-muted">{comment.content}</p>
           <div className="mt-4 flex items-center space-x-4">
             <button
               type="button"
               onClick={() => onLike(comment._id)}
-              className={`flex items-center text-sm font-medium ${
+              className={`flex cursor-pointer items-center text-sm font-medium ${
                 likedByCurrentUser
                   ? "text-blue-600 dark:text-blue-400"
                   : "text-gray-500 hover:underline dark:text-gray-400"

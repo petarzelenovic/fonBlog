@@ -202,7 +202,7 @@ export default function UpdatePost() {
           onChange={(value) => setFormData({ ...formData, content: value })}
           value={formData.content || ""}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full bg-fon-navy text-white hover:bg-fon-navy-hover">
           Update post
         </Button>
         {publishError && (

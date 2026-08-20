@@ -103,10 +103,10 @@ export default function Search() {
 
   return (
     <div className="flex flex-col md:flex-row">
-      <div className="p-7 border-b md:border-r md:min-h-screen border-gray-500">
+      <div className="border-b border-fon-border bg-white p-7 md:min-h-screen md:border-r dark:border-fon-dark-border dark:bg-fon-dark-surface">
         <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
           <div className="flex items-center gap-2">
-            <label>Search Term:</label>
+            <label className="text-sm font-medium text-fon-navy dark:text-white">Search Term:</label>
             <TextInput
               type="text"
               placeholder="Search..."
@@ -116,14 +116,14 @@ export default function Search() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <label>Sort:</label>
+            <label className="text-sm font-medium text-fon-navy dark:text-white">Sort:</label>
             <Select id="sort" value={sidebarData.sort} onChange={handleChange}>
               <option value="desc">Newest</option>
               <option value="asc">Oldest</option>
             </Select>
           </div>
           <div className="flex items-center gap-2">
-            <label>Category:</label>
+            <label className="text-sm font-medium text-fon-navy dark:text-white">Category:</label>
             <Select
               id="category"
               value={sidebarData.category}
@@ -137,15 +137,15 @@ export default function Search() {
               ))}
             </Select>
           </div>
-          <Button type="submit">Search</Button>
+          <Button type="submit" className="bg-fon-navy text-white hover:bg-fon-navy-hover">Search</Button>
         </form>
       </div>
       <div className="w-full">
-        <h1 className="text-3xl font-semibold p-3 mt-5">Search Results</h1>
+        <h1 className="mt-5 p-3 text-3xl font-semibold text-fon-navy dark:text-white">Search Results</h1>
         <div className="p-7 flex flex-wrap gap-4">
           {!loading && posts.length === 0 && (
             <div className="flex justify-center items-center h-full">
-              <p className="text-gray-500">No posts found</p>
+              <p className="text-fon-muted">No posts found</p>
             </div>
           )}
           {loading && (
@@ -159,7 +159,7 @@ export default function Search() {
           {showMore && (
             <button
               onClick={handleShowMore}
-              className="text-teal-500 text-lg hover:underline p-7 w-full"
+              className="w-full p-7 text-lg text-fon-magenta hover:underline"
             >
               Show More
             </button>

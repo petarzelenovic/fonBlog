@@ -35,7 +35,16 @@ export function CategoriesProvider({ children }) {
       categories.find((category) => category.slug === slug)?.name ?? slug;
 
     const getCategoryColor = (slug) =>
-      categories.find((category) => category.slug === slug)?.color ?? "#6B7280";
+      categories.find((category) => category.slug === slug)?.color ?? "#004A7C";
+
+    const getCategoryTextColor = (slug) => {
+      const hex = getCategoryColor(slug).replace("#", "");
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
+      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+      return yiq >= 160 ? "#004A7C" : "#FFFFFF";
+    };
 
     return {
       categories,
@@ -43,6 +52,7 @@ export function CategoriesProvider({ children }) {
       defaultCategorySlug: categories[0]?.slug ?? "",
       getCategoryName,
       getCategoryColor,
+      getCategoryTextColor,
     };
   }, [categories, loading]);
 

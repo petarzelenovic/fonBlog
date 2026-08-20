@@ -130,16 +130,16 @@ export default function CommentSection({ postId }) {
   }, [postId]);
 
   return (
-    <section className="mt-12 border-t border-gray-200 pt-10 antialiased dark:border-gray-700">
+    <section className="mt-12 border-t border-fon-border pt-10 antialiased dark:border-fon-dark-border">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-gray-900 lg:text-2xl dark:text-white">
+        <h2 className="text-lg font-bold text-fon-navy lg:text-2xl dark:text-white">
           Komentari ({comments.length})
         </h2>
       </div>
 
       {currentUser ? (
         <form className="mb-8" onSubmit={handleSubmit}>
-          <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-800">
+          <div className="mb-4 rounded-lg border border-fon-border bg-white px-4 py-2 dark:border-fon-dark-border dark:bg-fon-dark">
             <label htmlFor="comment" className="sr-only">
               Vaš komentar
             </label>
@@ -154,12 +154,12 @@ export default function CommentSection({ postId }) {
             />
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-fon-muted dark:text-fon-dark-muted">
               {200 - comment.length} karaktera preostalo
             </p>
             <Button
               type="submit"
-              className="bg-blue-700 text-white hover:bg-blue-800"
+              className="bg-fon-navy text-white hover:bg-fon-navy-hover"
               disabled={comment.trim().length === 0}
             >
               Objavi komentar
@@ -172,20 +172,20 @@ export default function CommentSection({ postId }) {
           )}
         </form>
       ) : (
-        <div className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+        <div className="mb-8 rounded-lg border border-fon-border bg-fon-bg p-4 text-sm text-fon-muted dark:border-fon-dark-border dark:bg-fon-dark dark:text-fon-dark-muted">
           Morate biti prijavljeni da biste ostavili komentar.{" "}
-          <Link to="/sign-in" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
+          <Link to="/sign-in" className="font-medium text-fon-magenta hover:underline">
             Prijavite se
           </Link>
         </div>
       )}
 
       {comments.length === 0 ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-fon-muted dark:text-fon-dark-muted">
           Još nema komentara. Budite prvi koji će ostaviti komentar.
         </p>
       ) : (
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+        <div className="divide-y divide-fon-border dark:divide-fon-dark-border">
           {comments.map((commentItem) => (
             <Comment
               key={commentItem._id}
