@@ -178,7 +178,7 @@ export default function PostPage() {
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-fon-navy/70" />
+        <div className="absolute inset-0 bg-gray-900/80" />
         <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
           <div className="w-full lg:w-8/12 lg:pr-12">
             <Link

@@ -59,7 +59,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-fon-border bg-white dark:border-fon-dark-border dark:bg-fon-dark-surface">
+    <header className="sticky top-0 z-30 bg-gray-50 dark:bg-gray-800">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link to="/" className="inline-flex shrink-0 items-center">
           <img src={logo} alt="Fon Blog" className="h-10 w-auto" />
@@ -69,11 +69,11 @@ export default function Header() {
           onSubmit={handleSearch}
           className="relative min-w-0 flex-1 md:max-w-xs lg:max-w-sm"
         >
-          <AiOutlineSearch className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-fon-muted" />
+          <AiOutlineSearch className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="search"
             placeholder="Pretraga..."
-            className="w-full rounded-lg border border-fon-border bg-fon-bg py-2 pr-3 pl-9 text-sm text-fon-text placeholder:text-fon-muted focus:border-fon-navy focus:outline-none focus:ring-1 focus:ring-fon-navy dark:border-fon-dark-border dark:bg-fon-dark dark:text-fon-dark-text dark:placeholder:text-fon-dark-muted dark:focus:border-fon-magenta dark:focus:ring-fon-magenta"
+            className="w-full rounded-lg border border-gray-200 bg-white py-2 pr-3 pl-9 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             aria-label="Pretraga"
@@ -83,7 +83,7 @@ export default function Header() {
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <button
             type="button"
-            className="flex size-9 cursor-pointer items-center justify-center rounded-lg text-fon-navy hover:bg-fon-bg dark:text-fon-gold dark:hover:bg-fon-gold/15"
+            className="flex size-9 cursor-pointer items-center justify-center rounded-lg hover:bg-gray-200 dark:text-gray-400 dark:hover:bg-amber-500/15 dark:hover:text-amber-400"
             onClick={() => dispatch(toggleTheme())}
             aria-label={theme === "dark" ? "Svetli režim" : "Tamni režim"}
           >
@@ -108,7 +108,7 @@ export default function Header() {
                 floating: {
                   base: "z-40 w-64 rounded-xl shadow-lg",
                   style: {
-                    auto: "border border-fon-border bg-white dark:border-fon-dark-border dark:bg-fon-dark-surface",
+                    auto: "border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
                   },
                 },
               }}
@@ -130,10 +130,10 @@ export default function Header() {
                   size="md"
                 />
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-fon-navy dark:text-white">
+                  <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
                     {currentUser.username}
                   </p>
-                  <p className="truncate text-xs text-fon-muted dark:text-fon-dark-muted">
+                  <p className="truncate text-xs text-gray-500 dark:text-gray-400">
                     {currentUser.email}
                   </p>
                 </div>

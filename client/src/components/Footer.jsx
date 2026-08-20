@@ -3,13 +3,13 @@ import { useCategories } from "../contexts/CategoriesContext.jsx";
 import logo from "../assets/logo.svg";
 
 const linkClass =
-  "text-sm text-fon-muted hover:text-fon-magenta dark:text-fon-dark-muted dark:hover:text-fon-magenta";
+  "text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500";
 
 export default function FooterComponent() {
   const { categories } = useCategories();
 
   return (
-    <footer className="border-t border-fon-border bg-white dark:border-fon-dark-border dark:bg-fon-dark-surface">
+    <footer className="bg-gray-50 dark:bg-gray-800">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid items-center gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-5">
@@ -19,7 +19,7 @@ export default function FooterComponent() {
           </div>
 
           <div className="lg:col-span-4">
-            <h2 className="mb-4 text-sm font-bold tracking-wide text-fon-navy uppercase dark:text-white">
+            <h2 className="mb-4 text-sm font-bold tracking-wide text-gray-900 uppercase dark:text-white">
               Kategorije
             </h2>
             <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
@@ -41,7 +41,7 @@ export default function FooterComponent() {
           </div>
 
           <div className="lg:col-span-3">
-            <h2 className="mb-4 text-sm font-bold tracking-wide text-fon-navy uppercase dark:text-white">
+            <h2 className="mb-4 text-sm font-bold tracking-wide text-gray-900 uppercase dark:text-white">
               Navigacija
             </h2>
             <ul className="space-y-2">
@@ -59,8 +59,8 @@ export default function FooterComponent() {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-fon-border pt-6 dark:border-fon-dark-border">
-          <p className="text-sm text-fon-muted dark:text-fon-dark-muted">
+        <div className="mt-10 border-t border-gray-200 pt-6 dark:border-gray-700">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             © {new Date().getFullYear()} Fon Blog
           </p>
         </div>
