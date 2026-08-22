@@ -1,5 +1,7 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
+import Post from "../models/post.model.js";
+import Comment from "../models/comment.model.js";
 import { errorHandler } from "../utils/error.js";
 import { isValidUsername } from "../utils/username.js";
 
@@ -67,10 +69,30 @@ export const deleteUser = async (req, res, next) => {
     return next(errorHandler(403, "You are not allowed to delete this user"));
   }
   try {
-    const deletedUser = await User.findByIdAndDelete(req.params.userId);
-    if (!deletedUser) {
+    const user = await User.findById(req.params.userId);
+    if (!user) {
       return next(errorHandler(404, "User not found"));
     }
+
+    const userId = user._id;
+    const userIdStr = userId.toString();
+    const postIds = await Post.find({ userId }).distinct("_id");
+    const commentIds = await Comment.find({ userId }).distinct("_id");
+
+    await Comment.deleteMany({
+      $or: [
+        { userId },
+        { postId: { $in: postIds } },
+        { parentId: { $in: commentIds } },
+      ],
+    });
+    await Comment.updateMany(
+      { likes: userIdStr },
+      { $pull: { likes: userIdStr }, $inc: { numberOfLikes: -1 } },
+    );
+    await Post.deleteMany({ userId });
+    await User.findByIdAndDelete(userId);
+
     if (req.user.id === req.params.userId) {
       res.clearCookie("access_token");
     }

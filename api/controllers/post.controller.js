@@ -1,5 +1,6 @@
 import { errorHandler } from "../utils/error.js";
 import Post from "../models/post.model.js";
+import Comment from "../models/comment.model.js";
 import { validateCategorySlug } from "./category.controller.js";
 
 function isEmptyHtml(html = "") {
@@ -137,10 +138,12 @@ export const deletePost = async (req, res, next) => {
     );
   }
   try {
-    const deletedPost = await Post.findByIdAndDelete(req.params.postId);
-    if (!deletedPost) {
+    const post = await Post.findById(req.params.postId);
+    if (!post) {
       return next(errorHandler(404, "Post not found"));
     }
+    await Comment.deleteMany({ postId: post._id });
+    await Post.findByIdAndDelete(post._id);
     res.status(204).end();
   } catch (error) {
     return next(error);
